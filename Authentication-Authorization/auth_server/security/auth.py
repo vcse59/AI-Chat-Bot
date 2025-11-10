@@ -1,10 +1,33 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+import warnings
+import sys
+import io
+import logging
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session, joinedload
+
+# Suppress passlib bcrypt version warning for bcrypt 4.x compatibility
+warnings.filterwarnings("ignore", category=UserWarning, module="passlib")
+logging.getLogger("passlib").setLevel(logging.ERROR)
+
+# Temporarily suppress stderr to hide passlib bcrypt version error message
+_stderr = sys.stderr
+_old_stderr_write = sys.stderr.write
+
+def _silent_stderr_write(text):
+    """Silently ignore stderr writes from passlib during import."""
+    if "bcrypt" not in text.lower() and "AttributeError" not in text:
+        _old_stderr_write(text)
+
+sys.stderr.write = _silent_stderr_write
+
+try:
+    from passlib.context import CryptContext
+finally:
+    sys.stderr.write = _old_stderr_write
 
 from ..models.user import User
 from ..database import get_db
