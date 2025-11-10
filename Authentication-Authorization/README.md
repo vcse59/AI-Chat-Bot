@@ -62,11 +62,14 @@ graph TD
 ## Features
 
 - User authentication with username/password
-- JWT token issuance and validation
-- Role-based access control (RBAC)
-- SQLite database backend
+- JWT token generation and validation with timezone-aware expiration
+- Role-based access control (RBAC) with eager loading
+- SQLite database backend with absolute path configuration
+- Password hashing using passlib with bcrypt
+- Comprehensive test suite with pytest
 - Poetry dependency management
 - API documentation with OpenAPI/Swagger
+- Pydantic v2 schemas with field validation
 
 ## Installation
 
@@ -78,6 +81,27 @@ pip install poetry
 2. Install dependencies:
 ```bash
 poetry install
+```
+
+3. The database file (`auth.db`) will be automatically created in the `Authentication-Authorization` directory when you first run the server.
+
+## Running Tests
+
+Run the full test suite:
+```bash
+poetry run pytest
+```
+
+Run specific tests:
+```bash
+poetry run pytest tests/test_auth.py
+poetry run pytest tests/test_users.py
+poetry run pytest tests/test_roles.py
+```
+
+Run tests with verbose output:
+```bash
+poetry run pytest -v
 ```
 
 ## Usage
@@ -213,37 +237,65 @@ poetry run start
 
 ## Security Notes
 
-- In production, replace the default secret key with a secure one
+- In production, replace the default secret key with a secure one (use environment variables)
 - Use HTTPS in production
 - Implement rate limiting for production use
 - Consider adding password complexity requirements
-- Review and adjust token expiration times as needed
+- Review and adjust token expiration times as needed (currently 30 minutes)
+- Database uses absolute path to prevent duplicate database files
+- Password hashing uses passlib with bcrypt for secure storage
+- JWT tokens are timezone-aware using UTC timestamps
+
+## Recent Updates
+
+### Version 0.1.0 (Latest)
+- Fixed all test failures related to authentication and authorization
+- Updated to timezone-aware datetime handling (`datetime.now(timezone.utc)`)
+- Improved role verification with proper eager loading using SQLAlchemy's `joinedload`
+- Fixed Pydantic v2 schema validation for Role objects with `field_validator`
+- Centralized authentication with `get_current_user` dependency
+- Fixed database path to use absolute path (prevents multiple database files)
+- Suppressed passlib bcrypt version compatibility warnings
+- Added comprehensive test coverage for all endpoints
+- Updated to Pydantic v2 with `ConfigDict` and modern validators
 
 ## Project Structure
 
 ```
-auth_server/
+Authentication-Authorization/
+    auth.db                # SQLite database (auto-created on first run)
+    pyproject.toml         # Poetry dependencies and project configuration
+    poetry.lock            # Locked dependency versions
+    README.md              # This file
     auth_server/
-        database/           # Database configuration and sessions
+        __init__.py
+        main.py            # Application entry point
+        database/          # Database configuration and sessions
             __init__.py
-            db.py
+            db.py          # SQLAlchemy setup with absolute path
         security/          # Security and authentication
             __init__.py
-            auth.py
+            auth.py        # JWT, password hashing, current user dependency
         models/            # SQLAlchemy models
             __init__.py
-            role.py
-            user_role.py
-            user.py
+            role.py        # Role model
+            user_role.py   # User-Role association table
+            user.py        # User model with hybrid properties
         routers/           # API routes
             __init__.py
-            auth.py
-            roles.py
-            users.py
-        schemas/           # Pydantic schemas
+            auth.py        # Token generation endpoint
+            roles.py       # Role management endpoints
+            users.py       # User CRUD endpoints
+        schemas/           # Pydantic v2 schemas
             __init__.py
-            role.py
-            user.py
+            role.py        # Role schemas
+            user.py        # User schemas with field validators
+    tests/                 # Test suite
+        __init__.py
+        test_main.py       # Test setup and fixtures
+        test_auth.py       # Authentication tests
+        test_users.py      # User endpoint tests
+        test_roles.py      # Role endpoint tests
 ```
 
 ## Support & Contact
