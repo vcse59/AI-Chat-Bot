@@ -6,7 +6,7 @@ from ..models.user import User
 from ..models.role import Role
 from .. import schemas
 from ..database import get_db
-from ..security import get_password_hash, oauth2_scheme, verify_token
+from ..security import get_password_hash, get_current_user
 
 router = APIRouter(
     prefix="/users",
@@ -47,19 +47,18 @@ async def create_user(
 async def list_users(
     skip: int = 0,
     limit: int = 100,
-    current_token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Verify admin access
-    payload = verify_token(current_token)
-    current_user = db.query(User).filter(User.username == payload.get("sub")).first()
-    if not current_user or "admin" not in [role.name for role in current_user.roles]:
+    # Verify admin access - ensure roles are loaded
+    user_roles = [role.name for role in current_user.roles] if current_user.roles else []
+    if not current_user or "admin" not in user_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only administrators can list all users"
         )
     
-    users = db.query(User).offset(skip).limit(limit).all()
+    users = db.query(User).options(joinedload(User.roles)).offset(skip).limit(limit).all()
     return {
         "users": [{
             "id": user.id,
@@ -71,80 +70,43 @@ async def list_users(
     }
 
 @router.get("/me", response_model=schemas.UserInDB)
-async def read_users_me(
-    current_token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-):
-    # Verify token
-    payload = verify_token(current_token)
-    username = payload.get("sub")
-    if username is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials"
-        )
-    
-    # Get user from database with roles eagerly loaded
-    user = db.query(User).options(joinedload(User.roles)).filter(
-        User.username == username
-    ).first()
-    
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials"
-        )
-    
-    return {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "is_active": user.is_active,
-        "roles": [role.name for role in user.roles]
-    }
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return current_user
 
 @router.get("/{username}", response_model=schemas.UserInDB)
 async def read_user(
     username: str,
-    current_token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Verify access (admin or self)
-    payload = verify_token(current_token)
-    current_user = db.query(User).filter(User.username == payload.get("sub")).first()
-    is_admin = current_user and "admin" in [role.name for role in current_user.roles]
+    # Verify access (admin or self) - ensure roles are loaded
+    user_roles = [role.name for role in current_user.roles] if current_user.roles else []
+    is_admin = "admin" in user_roles
     
-    if not is_admin and payload.get("sub") != username:
+    if not is_admin and current_user.username != username:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied"
         )
     
-    user = db.query(User).filter(User.username == username).first()
+    user = db.query(User).options(joinedload(User.roles)).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    return {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "is_active": user.is_active,
-        "roles": [role.name for role in user.roles]
-    }
+    return user
 
 @router.put("/{username}", response_model=schemas.UserResponse)
 async def update_user(
     username: str,
     user_update: schemas.UserUpdate,
-    current_token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Verify access (admin or self)
-    payload = verify_token(current_token)
-    current_user = db.query(User).filter(User.username == payload.get("sub")).first()
-    is_admin = current_user and "admin" in [role.name for role in current_user.roles]
+    # Verify access (admin or self) - ensure roles are loaded
+    user_roles = [role.name for role in current_user.roles] if current_user.roles else []
+    is_admin = "admin" in user_roles
     
-    if not is_admin and payload.get("sub") != username:
+    if not is_admin and current_user.username != username:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied"
@@ -167,13 +129,12 @@ async def update_user(
 @router.delete("/{username}", response_model=schemas.UserResponse)
 async def delete_user(
     username: str,
-    current_token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Verify admin access
-    payload = verify_token(current_token)
-    current_user = db.query(User).filter(User.username == payload.get("sub")).first()
-    if not current_user or "admin" not in [role.name for role in current_user.roles]:
+    # Verify admin access - ensure roles are loaded
+    user_roles = [role.name for role in current_user.roles] if current_user.roles else []
+    if "admin" not in user_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only administrators can delete users"

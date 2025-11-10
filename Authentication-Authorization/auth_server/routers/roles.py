@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from .. import schemas
 from ..models.user import User
 from ..models.role import Role
 from ..database import get_db
-from ..security import oauth2_scheme, verify_token
+from ..security import get_current_user
 
 router = APIRouter(
     prefix="/roles",
@@ -16,28 +16,19 @@ router = APIRouter(
 async def update_user_roles(
     username: str,
     roles_update: schemas.UpdateUserRoles,
-    current_token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Verify token and get current user
-    payload = verify_token(current_token)
-    current_username = payload.get("sub")
-    if not current_username:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials"
-        )
-
-    # Check if current user has admin role
-    current_user = db.query(User).filter(User.username == current_username).first()
-    if not current_user or "admin" not in [role.name for role in current_user.roles]:
+    # Check if current user has admin role - ensure roles are loaded
+    user_roles = [role.name for role in current_user.roles] if current_user.roles else []
+    if not current_user or "admin" not in user_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only administrators can update user roles"
         )
 
     # Get target user
-    user = db.query(User).filter(User.username == username).first()
+    user = db.query(User).options(joinedload(User.roles)).filter(User.username == username).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

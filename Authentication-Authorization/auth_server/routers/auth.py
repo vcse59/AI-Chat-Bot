@@ -1,7 +1,7 @@
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..models.user import User
 from ..security import verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -19,7 +19,7 @@ async def login_for_access_token(
     db: Session = Depends(get_db)
 ):
     # Check user credentials
-    user = db.query(User).filter(User.username == form_data.username).first()
+    user = db.query(User).options(joinedload(User.roles)).filter(User.username == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
