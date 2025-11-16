@@ -4,13 +4,22 @@ A production-ready, full-stack chatbot platform featuring a React frontend, OAut
 
 ## 🌟 Overview
 
-This platform consists of three main components working together to provide a secure, intelligent chatbot experience:
+This platform consists of four main components working together to provide a secure, intelligent chatbot experience with comprehensive analytics:
 
-1. **React Chat Frontend** (Port 3000) - Modern, responsive web UI with real-time messaging
+1. **React Chat Frontend** (Port 3000) - Modern, responsive web UI with real-time messaging and integrated analytics panel
 2. **Authorization Server** (Port 8001) - OAuth 2.0 authentication and role-based access control
 3. **ChatBot Service** (Port 8000) - AI-powered conversations with OpenAI and WebSocket support
+4. **Analytics Service** (Port 8002) - Admin-only analytics and metrics tracking with real-time updates
 
 All services are containerized with Docker and orchestrated using Docker Compose for easy deployment.
+
+### 🎯 Key Highlights
+
+- 📊 **Integrated Analytics Panel**: View metrics alongside chat without leaving the conversation
+- 🔄 **Real-time Tracking**: Automatic refresh of analytics data every 30 seconds
+- 🎫 **Token Tracking**: Monitor OpenAI API token usage across all conversations
+- 👥 **User Activity**: Track active users, conversations, and message counts
+- 🚀 **Production Ready**: Comprehensive tracking middleware and public API endpoints
 
 ## 🏗️ System Architecture
 
@@ -21,38 +30,47 @@ All services are containerized with Docker and orchestrated using Docker Compose
 └────────────┬────────────────────────────────────────────────────┘
              │
              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        User Browser                              │
+│                    http://localhost:3000                         │
+│  Features: Chat Interface + Real-time Analytics Side Panel       │
+└────────────┬────────────────────────────────────────────────────┘
+             │
+             ▼
 ┌────────────────────────────────────────────────────────────────┐
 │                    React Chat Frontend                          │
 │                      (Port 3000)                                │
-│  - Login/Register UI         - Protected Routes                │
+│  - Login/Register UI         - Analytics Side Panel            │
 │  - Chat Interface            - State Management                 │
 │  - WebSocket Client          - OAuth 2.0 Integration            │
-└──────┬─────────────────────────────────────────────┬───────────┘
-       │                                             │
-       │ HTTP POST /auth/token                       │ HTTP + Bearer Token
-       │ HTTP POST /users/                           │ WebSocket + Token
-       │                                             │
-       ▼                                             ▼
-┌─────────────────────────┐           ┌────────────────────────────┐
-│  Authorization Server   │           │    ChatBot Service         │
-│      (Port 8001)        │◄──────────│      (Port 8000)           │
-│                         │  Verify   │                            │
-│  - User Management      │  Token    │  - Conversation CRUD       │
-│  - JWT Token Service    │           │  - Message Management      │
-│  - RBAC (Roles)         │           │  - WebSocket Handler       │
-│  - Password Hashing     │           │  - OpenAI Integration      │
-│                         │           │  - OAuth Middleware        │
-└──────────┬──────────────┘           └────────────┬───────────────┘
-           │                                       │
-           ▼                                       ▼
-    ┌─────────────┐                        ┌──────────────┐
-    │  auth.db    │                        │conversations.│
-    │  (SQLite)   │                        │   db         │
-    │             │                        │  (SQLite)    │
-    │ - users     │                        │              │
-    │ - roles     │                        │- conversations
-    │ - user_roles│                        │- messages    │
-    └─────────────┘                        └──────────────┘
+│  - Conversation List         - Real-time Metrics Display        │
+└──────┬─────────────────────────────────────────┬──────┬─────────┘
+       │                                         │      │
+       │ Auth                                    │      │ Analytics
+       │                                         │      │ (Admin)
+       ▼                                         ▼      ▼
+┌──────────────────┐    ┌──────────────────┐   ┌──────────────────┐
+│ Auth Server      │    │ ChatBot Service  │   │ Analytics Service│
+│  (Port 8001)     │◄───│   (Port 8000)    │──►│   (Port 8002)    │
+│                  │    │                  │   │                  │
+│ - User Mgmt      │    │ - Conversation   │   │ - Metrics Track  │
+│ - JWT Tokens     │    │ - Messages       │   │ - Activity Logs  │
+│ - RBAC           │    │ - WebSocket      │   │ - User Stats     │
+│ - Activity Track │───►│ - OpenAI API     │   │ - Token Counting │
+│                  │    │ - Analytics MW   │───│ - Admin API      │
+└────────┬─────────┘    └────────┬─────────┘   └────────┬─────────┘
+         │                       │                      │
+         ▼                       ▼                      ▼
+  ┌─────────────┐        ┌──────────────┐      ┌──────────────┐
+  │  auth.db    │        │conversations.│      │ analytics.db │
+  │  (SQLite)   │        │   db         │      │  (SQLite)    │
+  │             │        │  (SQLite)    │      │              │
+  │ - users     │        │              │      │ - user_activity
+  │ - roles     │        │- conversations      │ - conversations
+  │ - user_roles│        │- messages    │      │ - messages   │
+  └─────────────┘        └──────────────┘      │ - api_usage  │
+                                               │ - daily_stats│
+                                               └──────────────┘
 ```
 
 ## ✨ Key Features
@@ -61,6 +79,12 @@ All services are containerized with Docker and orchestrated using Docker Compose
 - 🎨 **Modern UI**: Gradient themes, responsive design, smooth animations
 - 🔐 **Secure Authentication**: OAuth 2.0 with JWT tokens
 - 💬 **Real-time Chat**: WebSocket-based instant messaging
+- 📊 **Analytics Side Panel**: View metrics alongside conversations (Admin-only)
+  - Total users, active users, conversations, messages, tokens
+  - Recent user activity with timestamps
+  - Most active users leaderboard
+  - Auto-refresh every 30 seconds
+  - Manual refresh button
 - 📱 **Mobile Responsive**: Works on all device sizes
 - 🔄 **Auto-reconnect**: Automatic WebSocket reconnection
 - 📝 **Conversation Management**: Create, view, delete conversations
@@ -73,6 +97,13 @@ All services are containerized with Docker and orchestrated using Docker Compose
 - 🔌 **WebSocket Support**: Real-time bidirectional communication
 - 🔑 **Hash-based IDs**: Secure, non-sequential identifiers
 - 📊 **RESTful API**: Complete CRUD operations
+- 📈 **Analytics Tracking**: Comprehensive metrics and activity logging
+  - Automatic API usage tracking via middleware
+  - User activity tracking (login, logout, conversations)
+  - Message and token counting
+  - Conversation metrics (message count, tokens, response time)
+  - Public tracking endpoints for service-to-service communication
+  - Admin-protected analytics dashboard API
 - 🏥 **Health Checks**: Service monitoring endpoints
 
 ## 📦 Project Structure
@@ -85,7 +116,8 @@ Open-ChatBot/
 │   │   │   ├── ChatWindow.js
 │   │   │   ├── ConversationList.js
 │   │   │   ├── MessageList.js
-│   │   │   └── MessageInput.js
+│   │   │   ├── MessageInput.js
+│   │   │   └── MetricsCard.js      # Analytics metric cards
 │   │   ├── contexts/
 │   │   │   └── AuthContext.js    # Auth state management
 │   │   ├── hooks/
@@ -94,10 +126,12 @@ Open-ChatBot/
 │   │   ├── pages/
 │   │   │   ├── Login.js
 │   │   │   ├── Register.js
-│   │   │   └── ChatPage.js
+│   │   │   ├── ChatPage.js       # Main chat with analytics panel
+│   │   │   └── AnalyticsDashboard.js  # Full analytics page
 │   │   ├── services/
 │   │   │   ├── authService.js    # Auth API client
 │   │   │   ├── chatService.js    # Chat API client
+│   │   │   ├── analyticsService.js # Analytics API client
 │   │   │   └── websocketService.js
 │   │   ├── App.js                # Main app with routing
 │   │   └── index.js
@@ -105,17 +139,16 @@ Open-ChatBot/
 │   ├── nginx.conf
 │   └── package.json
 │
-├── authentication-authorization/  # Auth server
-│   └── Authentication-Authorization/
-│       ├── auth_server/
-│       │   ├── main.py           # FastAPI app
-│       │   ├── database/         # DB configuration
-│       │   ├── models/           # SQLAlchemy models
-│       │   ├── routers/          # API routes
-│       │   ├── schemas/          # Pydantic schemas
-│       │   └── security/         # Auth logic
-│       ├── tests/
-│       └── Dockerfile
+├── auth-service/                  # Auth server
+│   ├── auth_server/
+│   │   ├── main.py               # FastAPI app
+│   │   ├── database/             # DB configuration
+│   │   ├── models/               # SQLAlchemy models
+│   │   ├── routers/              # API routes
+│   │   ├── schemas/              # Pydantic schemas
+│   │   └── security/             # Auth logic
+│   ├── tests/
+│   └── Dockerfile
 │
 ├── openai_web_service/            # ChatBot service
 │   ├── api/
@@ -128,10 +161,29 @@ Open-ChatBot/
 │   │   └── oauth.py              # OAuth integration
 │   ├── websocket/
 │   │   └── chat_handler.py       # WebSocket handler
+│   ├── middleware/
+│   │   └── analytics_middleware.py # Analytics tracking
 │   ├── services/
 │   │   └── openai_service.py
 │   ├── utilities/
 │   │   └── hash_utils.py         # ID generation
+│   ├── main.py
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── analytics-service/             # Analytics service
+│   ├── analytics/
+│   │   ├── database/             # DB configuration
+│   │   ├── models/               # Analytics models
+│   │   │   └── analytics.py      # Metrics models
+│   │   ├── routers/              # API routes
+│   │   │   └── analytics.py      # Analytics endpoints
+│   │   ├── schemas/              # Pydantic schemas
+│   │   │   └── analytics.py      # Response schemas
+│   │   ├── services/             # Business logic
+│   │   │   └── analytics_service.py
+│   │   └── security/             # Auth logic
+│   │       └── auth.py           # JWT validation
 │   ├── main.py
 │   ├── Dockerfile
 │   └── requirements.txt
@@ -227,6 +279,7 @@ This will start:
 - React Frontend: `http://localhost:3000`
 - Auth Server: `http://localhost:8001`
 - ChatBot Service: `http://localhost:8000`
+- Analytics Service: `http://localhost:8002` ⭐ **NEW**
 
 ### 4. Access the Application
 
@@ -276,6 +329,32 @@ This will start:
 2. Click 🗑️ button
 3. Confirm deletion
 
+### Using Analytics (Admin Only)
+
+**Integrated Side Panel:**
+1. Login as admin user
+2. Click "📊 Analytics" button in header
+3. Analytics panel appears on right side
+4. View metrics while chatting:
+   - Total Users
+   - Active Users Today
+   - Total Conversations
+   - Total Messages
+   - Total Tokens Used
+   - Average Response Time
+5. Scroll to see:
+   - Recent user activity
+   - Most active users
+6. Click 🔄 Refresh to update data manually
+7. Data auto-refreshes every 30 seconds
+8. Click Analytics button again to close panel
+
+**Full Analytics Dashboard:**
+1. Navigate to `http://localhost:3000/analytics`
+2. View comprehensive metrics and charts
+3. Filter user activities
+4. Export reports (coming soon)
+
 ## 🔧 Development
 
 ### Frontend Development
@@ -292,7 +371,7 @@ Runs on `http://localhost:3000` with hot reload.
 
 **Auth Server:**
 ```bash
-cd authentication-authorization/Authentication-Authorization
+cd auth-service
 pip install -r requirements.txt
 uvicorn auth_server.main:app --reload --port 8001
 ```
@@ -396,6 +475,56 @@ Authorization: Bearer <token>
 ws://localhost:8000/ws/{conversation_id}?token=<jwt_token>
 ```
 
+### Analytics Service (Port 8002)
+
+**Interactive Docs:** `http://localhost:8002/docs`
+
+**Admin-only endpoints** - All require `Authorization: Bearer <admin-token>` header.
+
+**Get Analytics Summary**
+```bash
+GET /api/v1/analytics/summary
+Authorization: Bearer <admin_token>
+
+Response:
+{
+  "total_users": 10,
+  "active_users_today": 5,
+  "total_conversations": 25,
+  "total_messages": 150,
+  "total_tokens": 45000,
+  "total_api_calls": 200,
+  "avg_response_time": 0.45,
+  "error_rate": 0.02
+}
+```
+
+**Get User Activities**
+```bash
+GET /api/v1/analytics/users/activities?limit=10
+Authorization: Bearer <admin_token>
+```
+
+**Get Top Users**
+```bash
+GET /api/v1/analytics/users/top?limit=5
+Authorization: Bearer <admin_token>
+```
+
+**Get Users List with Filter**
+```bash
+GET /api/v1/analytics/users/list?active_only=true
+Authorization: Bearer <admin_token>
+```
+
+**Public Tracking Endpoints** (No auth - for service-to-service):
+```bash
+POST /api/v1/analytics/track/activity-public
+POST /api/v1/analytics/track/api-usage-public
+POST /api/v1/analytics/track/conversation-public
+POST /api/v1/analytics/track/message-public
+```
+
 ## 🔐 Security Features
 
 ### JWT Token-Based Authentication
@@ -464,6 +593,11 @@ curl http://localhost:8001/health
 **ChatBot Service:**
 ```bash
 curl http://localhost:8000/health
+```
+
+**Analytics Service:** ⭐ **NEW**
+```bash
+curl http://localhost:8002/health
 ```
 
 **React Frontend:**
@@ -545,6 +679,7 @@ docker-compose down
 | React Frontend | 3000 | Web UI |
 | Auth Server | 8001 | Authentication API |
 | ChatBot Service | 8000 | Chat API & WebSocket |
+| Analytics Service | 8002 | Admin-only analytics & metrics ⭐ **NEW** |
 
 ## 🔄 Data Flow
 
@@ -605,8 +740,10 @@ curl http://localhost:8000/conversations/ \
 ## 📚 Additional Documentation
 
 - [Frontend README](./chat-frontend/README.md)
-- [Auth Server README](./authentication-authorization/Authentication-Authorization/README.md)
+- [Auth Server README](./auth-service/README.md)
 - [ChatBot Service README](./openai_web_service/README.md)
+- [Analytics Service README](./analytics-service/README.md)
+- [**Analytics Integration Guide**](./ANALYTICS_GUIDE.md) ⭐ **NEW** - Complete analytics documentation
 - [CHANGELOG](./CHANGELOG.md) - Complete change history
 - [Testing Documentation](./tests/README.md)
 

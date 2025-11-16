@@ -3,7 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import RegisterAdmin from './pages/RegisterAdmin';
 import ChatPage from './pages/ChatPage';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import AdminRoute from './components/AdminRoute';
 import './App.css';
 
 // Protected Route Component
@@ -69,6 +72,24 @@ function App() {
                 <ProtectedRoute>
                   <ChatPage />
                 </ProtectedRoute>
+              }
+            />
+
+            {/* Admin-only routes */}
+            <Route
+              path="/analytics"
+              element={
+                <AdminRoute>
+                  <AnalyticsDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/register-admin"
+              element={
+                <AdminRoute>
+                  <RegisterAdmin />
+                </AdminRoute>
               }
             />
 

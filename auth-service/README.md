@@ -108,7 +108,7 @@ pip install poetry
 poetry install
 ```
 
-3. The database file (`auth.db`) will be automatically created in the `Authentication-Authorization` directory when you first run the server.
+3. The database file (`auth.db`) will be automatically created in the `auth-service` directory when you first run the server.
 
 ## Running Tests
 
@@ -287,7 +287,7 @@ poetry run start
 ## Project Structure
 
 ```
-Authentication-Authorization/
+auth-service/
     auth.db                # SQLite database (auto-created on first run)
     pyproject.toml         # Poetry dependencies and project configuration
     poetry.lock            # Locked dependency versions

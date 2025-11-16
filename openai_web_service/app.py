@@ -10,6 +10,7 @@ from engine.database import engine, Base
 from api.routes import router as api_router
 from websocket.chat_handler import websocket_handler
 from security.oauth import verify_token
+from middleware.analytics_middleware import AnalyticsMiddleware
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -35,6 +36,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add Analytics middleware
+app.add_middleware(AnalyticsMiddleware)
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")

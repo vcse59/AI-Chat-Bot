@@ -5,7 +5,85 @@ All notable changes to the Open ChatBot project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.0.0] - 2025-11-16
+
+### Added - Analytics Integration & Side Panel
+- **Analytics Service (Port 8002)**: Complete admin-only analytics and metrics tracking service
+  - User activity tracking (login, logout, conversations, messages)
+  - API usage monitoring with response times and error rates
+  - Conversation metrics (message count, token usage, avg response time)
+  - Message metrics with token counting
+  - Daily aggregated statistics
+  - Admin-protected dashboard API endpoints
+  - Public tracking endpoints for service-to-service communication
+- **Analytics Middleware**: Automatic API usage tracking for all chatbot service requests
+  - Fire-and-forget async tracking (non-blocking)
+  - Request timing and status code logging
+  - User identification from JWT tokens
+- **Analytics Side Panel in Chat UI**: Real-time metrics display alongside conversations
+  - Toggleable analytics panel (350px width)
+  - Key metrics cards: Total Users, Active Users Today, Total Conversations, Total Messages, Total Tokens, Avg Response Time
+  - Recent user activity list with timestamps and icons
+  - Most active users leaderboard
+  - Auto-refresh every 30 seconds
+  - Manual refresh button
+  - Responsive design with mobile overlay support
+  - Active state indicator on Analytics button
+- **Token Tracking**: Complete OpenAI token usage monitoring
+  - Token count captured for every message
+  - Aggregated at conversation level
+  - Total tokens displayed in analytics summary
+- **User Filtering**: Analytics endpoint to list users with activity filter
+  - GET `/api/v1/analytics/users/list`
+  - Query parameter: `active_only` (boolean)
+  - Returns user_id, username, activity_count, last_activity, is_active_today
+- **Service Integration**: Tracking integrated into auth and chatbot services
+  - Login/logout tracking in auth service
+  - Conversation creation/deletion tracking
+  - Message creation tracking with tokens
+  - Automatic user activity logging
+
+### Changed
+- **ChatPage Component**: Refactored to include analytics panel
+  - Added `showAnalytics` state for panel toggle
+  - Integrated analytics data loading
+  - Added auto-refresh interval (30 seconds)
+  - Enhanced header with active analytics button state
+- **Analytics Summary**: Enhanced to include token counting
+  - Added `total_tokens` field to AnalyticsSummary schema
+  - Improved user counting from multiple tables
+  - Uses max of users from UserActivity and ConversationMetrics
+- **Database Schema**: Analytics database models for comprehensive tracking
+  - UserActivity: user activities with timestamps
+  - ConversationMetrics: per-conversation stats
+  - MessageMetrics: per-message details with tokens
+  - APIUsage: API call tracking
+  - DailyStats: aggregated daily metrics
+- **Frontend Services**: Added `analyticsService.js` for API client
+  - Methods for summary, activities, top users, user list
+  - Proper error handling and authentication
+
+### Fixed
+- **SQLAlchemy Type Checking**: Resolved Pylance errors in analytics router
+  - Added `# type: ignore` comments for ORM operations
+  - Used proper SQLAlchemy `.update()` method
+  - Fixed column expression comparisons
+- **Analytics Router**: Fixed missing `func` import from SQLAlchemy
+  - Added `from sqlalchemy import func`
+  - Enabled aggregation queries (count, sum, max)
+- **Docker Build Caching**: Resolved file update issues
+  - Used manual `docker cp` for critical updates
+  - Verified file deployment in containers
+  - Proper rebuild procedures documented
+
+### Security
+- **Admin-Only Analytics**: All analytics viewing endpoints protected by `require_admin` dependency
+- **Public Tracking Endpoints**: Separate endpoints for service-to-service communication (no user auth)
+  - Only accessible within Docker network
+  - Not exposed to public internet
+- **JWT Validation**: Consistent token validation across all services
+
+## [2.5.0] - 2025-11-15
 
 ### Added
 - Full OAuth 2.0 authentication and authorization system

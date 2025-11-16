@@ -4,6 +4,8 @@ from typing import List, Optional
 from engine.database import get_database
 from engine import schemas, crud
 from security import get_current_user, get_current_active_user, require_admin, CurrentUser
+from middleware.analytics_middleware import track_conversation, track_message
+import asyncio
 
 router = APIRouter()
 
@@ -109,7 +111,19 @@ async def create_message(
         tokens_used=message.tokens_used,
         message_metadata=message.message_metadata
     )
-    return crud.create_message(db=db, message=full_message)
+    created_message = crud.create_message(db=db, message=full_message)
+    
+    # Track message creation in analytics
+    asyncio.create_task(track_message(
+        message_id=created_message.id,
+        conversation_id=conversation_id,
+        user_id=user.id,
+        role=message.role,
+        token_count=message.tokens_used or 0,
+        model_used=message.model
+    ))
+    
+    return created_message
 
 @router.get("/conversations/{conversation_id}/messages/", response_model=List[schemas.ChatMessageResponse], tags=["messages"])
 async def read_conversation_messages(
@@ -171,7 +185,16 @@ async def create_user_conversation(
     
     # Set the user_id in the conversation data
     conversation.user_id = user.id
-    return crud.create_conversation(db=db, conversation=conversation)
+    created_conversation = crud.create_conversation(db=db, conversation=conversation)
+    
+    # Track conversation creation in analytics
+    asyncio.create_task(track_conversation(
+        conversation_id=created_conversation.id,
+        user_id=user.id,
+        action="created"
+    ))
+    
+    return created_conversation
 
 @router.get("/users/{user_id}/conversations/", response_model=List[schemas.ConversationResponse], tags=["user-conversations"])
 async def get_user_conversations(
@@ -359,6 +382,13 @@ async def delete_user_conversation(
     success = crud.delete_conversation(db, conversation_id=conversation_id)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to delete conversation")
+    
+    # Track conversation deletion in analytics
+    asyncio.create_task(track_conversation(
+        conversation_id=conversation_id,
+        user_id=user.id,
+        action="deleted"
+    ))
     
     return {"message": "Conversation deleted successfully", "conversation_id": conversation_id}
 

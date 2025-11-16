@@ -30,6 +30,50 @@
   font-size: 16px;
 }
 
+.analytics-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.analytics-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.analytics-button.active {
+  background-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.6);
+  font-weight: bold;
+}
+
+.admin-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
 .logout-button {
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
@@ -51,6 +95,240 @@
   overflow: hidden;
 }
 
+/* Analytics Side Panel */
+.analytics-panel {
+  width: 350px;
+  background: white;
+  border-left: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.analytics-panel-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.analytics-panel-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.analytics-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.analytics-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Compact Metrics */
+.analytics-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.metric-mini {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+}
+
+.metric-icon {
+  font-size: 24px;
+}
+
+.metric-info {
+  flex: 1;
+}
+
+.metric-value {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.metric-label {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+/* Analytics Sections */
+.analytics-section {
+  margin-bottom: 20px;
+}
+
+.analytics-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Compact Activity List */
+.activity-list-compact {
+  background: #f9f9f9;
+  border-radius: 6px;
+  padding: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.activity-item-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.activity-item-compact:last-child {
+  margin-bottom: 0;
+}
+
+.activity-icon-small {
+  font-size: 18px;
+}
+
+.activity-details-compact {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-user {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activity-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: #666;
+}
+
+.activity-type-small {
+  font-weight: 500;
+}
+
+.activity-time-small {
+  color: #999;
+}
+
+/* Compact Top Users */
+.top-users-compact {
+  background: #f9f9f9;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.top-user-compact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.top-user-compact:last-child {
+  margin-bottom: 0;
+}
+
+.user-rank {
+  font-weight: bold;
+  color: #667eea;
+  min-width: 30px;
+}
+
+.user-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-count {
+  background: #667eea;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.empty-state-compact {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-size: 13px;
+}
+
 @media (max-width: 768px) {
   .chat-header {
     padding: 10px 15px;
@@ -64,8 +342,29 @@
     font-size: 14px;
   }
 
+  .analytics-button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .admin-button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
   .logout-button {
     padding: 6px 12px;
     font-size: 12px;
+  }
+
+  .analytics-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 300px;
+    z-index: 100;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
   }
 }

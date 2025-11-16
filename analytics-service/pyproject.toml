@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "analytics-service"
+version = "1.0.0"
+description = "Analytics and metrics tracking service for AI Chat Bot Platform"
+authors = ["AI Chat Bot Team"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+sqlalchemy = "^2.0.35"
+pydantic = "^2.9.2"
+pydantic-settings = "^2.6.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-multipart = "^0.0.17"
+requests = "^2.32.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

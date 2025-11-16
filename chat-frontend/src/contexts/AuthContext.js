@@ -38,12 +38,22 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const isAdmin = () => {
+    return user && user.roles && user.roles.includes('admin');
+  };
+
+  const hasRole = (role) => {
+    return user && user.roles && user.roles.includes(role);
+  };
+
   const value = {
     user,
     login,
     logout,
     register,
     isAuthenticated: !!user,
+    isAdmin,
+    hasRole,
     loading,
   };
 

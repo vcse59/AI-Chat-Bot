@@ -1,0 +1,134 @@
+.metrics-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  min-height: 140px;
+}
+
+.metrics-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.metrics-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.metrics-card-icon {
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.metrics-card-icon.users {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.metrics-card-icon.messages {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.metrics-card-icon.conversations {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.metrics-card-icon.tokens {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.metrics-card-icon.api-calls {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.metrics-card-icon.response-time {
+  background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+}
+
+.metrics-card-title {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metrics-card-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 8px 0;
+  line-height: 1;
+}
+
+.metrics-card-subtitle {
+  font-size: 13px;
+  color: #999;
+  margin-top: 8px;
+}
+
+.metrics-card-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.metrics-card-trend.positive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.metrics-card-trend.negative {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.metrics-card-trend.neutral {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.metrics-card.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.metrics-card-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.metrics-card-error {
+  color: #d32f2f;
+  font-size: 14px;
+  padding: 12px;
+  background: #ffebee;
+  border-radius: 4px;
+  margin-top: 8px;
+}
