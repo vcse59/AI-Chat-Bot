@@ -5,9 +5,9 @@ All notable changes to the Open ChatBot project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - 2025-11-16
+## [1.0.0] - 2025-11-16
 
-### Added - Analytics Integration & Side Panel
+### Added - Complete Platform with Analytics
 - **Analytics Service (Port 8002)**: Complete admin-only analytics and metrics tracking service
   - User activity tracking (login, logout, conversations, messages)
   - API usage monitoring with response times and error rates
@@ -42,39 +42,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Conversation creation/deletion tracking
   - Message creation tracking with tokens
   - Automatic user activity logging
+- **Core Platform Features**:
+  - OAuth 2.0 authentication and authorization system
+  - JWT token-based authentication with role-based access control (RBAC)
+  - Real-time WebSocket communication for chat messages
+  - OpenAI GPT integration for AI-powered conversations
+  - User auto-provisioning in chat database when authenticated
+  - Hash-based IDs for users and conversations (security)
+  - Conversation-specific WebSocket endpoint (`/ws/{conversation_id}`)
+  - User profile support with `full_name` field
+  - Docker containerization for all services
+  - Health check endpoints for all services
+  - CORS configuration for frontend-backend communication
+  - WebSocket reconnection logic with configurable retry attempts
+  - DELETE endpoint for conversations: `DELETE /api/v1/users/{user_id}/conversations/{conversation_id}`
 
-### Changed
-- **ChatPage Component**: Refactored to include analytics panel
-  - Added `showAnalytics` state for panel toggle
-  - Integrated analytics data loading
-  - Added auto-refresh interval (30 seconds)
-  - Enhanced header with active analytics button state
-- **Analytics Summary**: Enhanced to include token counting
-  - Added `total_tokens` field to AnalyticsSummary schema
-  - Improved user counting from multiple tables
-  - Uses max of users from UserActivity and ConversationMetrics
-- **Database Schema**: Analytics database models for comprehensive tracking
-  - UserActivity: user activities with timestamps
-  - ConversationMetrics: per-conversation stats
-  - MessageMetrics: per-message details with tokens
-  - APIUsage: API call tracking
-  - DailyStats: aggregated daily metrics
-- **Frontend Services**: Added `analyticsService.js` for API client
-  - Methods for summary, activities, top users, user list
-  - Proper error handling and authentication
-
-### Fixed
-- **SQLAlchemy Type Checking**: Resolved Pylance errors in analytics router
-  - Added `# type: ignore` comments for ORM operations
-  - Used proper SQLAlchemy `.update()` method
-  - Fixed column expression comparisons
-- **Analytics Router**: Fixed missing `func` import from SQLAlchemy
-  - Added `from sqlalchemy import func`
-  - Enabled aggregation queries (count, sum, max)
-- **Docker Build Caching**: Resolved file update issues
-  - Used manual `docker cp` for critical updates
-  - Verified file deployment in containers
-  - Proper rebuild procedures documented
+### Documentation
+- Complete README.md with all features
+- ANALYTICS_GUIDE.md - Comprehensive analytics documentation
+- Multiple admin setup guides
+- API documentation with Swagger UI for all services
+- Testing documentation with 50+ test cases
+- CHANGELOG.md for version tracking
 
 ### Security
 - **Admin-Only Analytics**: All analytics viewing endpoints protected by `require_admin` dependency
@@ -82,10 +71,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Only accessible within Docker network
   - Not exposed to public internet
 - **JWT Validation**: Consistent token validation across all services
+- Hash-based IDs (16 chars for users, 12 for conversations, 10 for messages)
+- BCrypt password hashing with salt
+- Environment-based secret key configuration
 
-## [2.5.0] - 2025-11-15
+### Fixed
+- SQLAlchemy type checking errors in analytics router
+- Docker build caching issues
+- Missing `func` import from SQLAlchemy
+- User registration now accepts and stores `full_name` field
+- JWT token signature verification across auth and chat services
+- Role field handling in OpenAI service
+- WebSocket reconnection failures when switching between conversations
+- Conversation deletion endpoint implementation
+- Permission validation in all user-scoped endpoints
+- Type-checking issues in openai_service.py
 
-### Added
+---
+
+For upgrade instructions and detailed feature information, see [README.md](README.md)
 - Full OAuth 2.0 authentication and authorization system
 - JWT token-based authentication with role-based access control (RBAC)
 - Real-time WebSocket communication for chat messages
