@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "auth-server"
+version = "0.1.0"
+description = "OAuth2 Authorization Server"
+authors = ["User"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.121.1"
+uvicorn = "^0.38.0"
+python-jose = {extras = ["cryptography"], version = "^3.5.0"}
+bcrypt = "^4.0.1"
+python-multipart = "^0.0.20"
+sqlalchemy = "^2.0.44"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+
+[tool.poetry.scripts]
+start = "auth_server.main:start"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

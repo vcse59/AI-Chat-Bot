@@ -1,0 +1,125 @@
+name: E2E Tests CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Create .env file
+        run: |
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
+          echo "AUTH_SECRET_KEY=${{ secrets.AUTH_SECRET_KEY }}" >> .env
+      
+      - name: Start services with Docker Compose
+        run: |
+          docker-compose up -d
+          echo "Waiting for services to be ready..."
+          sleep 15
+      
+      - name: Wait for Auth Service
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:8001/health; do sleep 2; done'
+          echo "Auth service is ready"
+      
+      - name: Wait for Chat Service
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
+          echo "Chat service is ready"
+      
+      - name: Check service logs
+        if: always()
+        run: |
+          echo "=== Auth Server Logs ==="
+          docker-compose logs auth-server
+          echo "=== Chat API Logs ==="
+          docker-compose logs openai-chatbot-api
+          echo "=== Frontend Logs ==="
+          docker-compose logs chat-frontend
+      
+      - name: Install test dependencies
+        run: |
+          pip install -r tests/requirements.txt
+      
+      - name: Run smoke tests
+        run: |
+          pytest tests/test_0_smoke.py -v
+      
+      - name: Run authentication tests
+        run: |
+          pytest tests/test_1_auth_service.py -v
+      
+      - name: Run chat API tests
+        run: |
+          pytest tests/test_2_chat_api.py -v
+      
+      - name: Run WebSocket tests
+        run: |
+          pytest tests/test_3_websocket.py -v
+        continue-on-error: true  # WebSocket tests may vary by implementation
+      
+      - name: Run end-to-end tests
+        run: |
+          pytest tests/test_4_end_to_end.py -v
+      
+      - name: Run all tests with coverage
+        run: |
+          pytest tests/ -v --cov=. --cov-report=xml --cov-report=html --cov-report=term
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: e2e-tests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+      
+      - name: Generate HTML test report
+        if: always()
+        run: |
+          pytest tests/ --html=test_report.html --self-contained-html
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            test_report.html
+            coverage.xml
+            htmlcov/
+      
+      - name: Comment test results on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'test_report.html';
+            
+            if (fs.existsSync(reportPath)) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '✅ E2E tests completed! Check the artifacts for detailed results.'
+              });
+            }
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose down -v

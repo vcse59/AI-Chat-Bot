@@ -1,3 +1,161 @@
-.venv
-__pycache__
+# Environment Variables and Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+.envrc
+
+# Secret and Key Files
+*secret*
+*Secret*
+*SECRET*
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+*_key
+*_secret
+*.crt
+*.cer
+secrets/
+secrets.*
+
+# API Keys and Tokens
+*api_key*
+*apikey*
+*api-key*
+*token*
+*Token*
+*TOKEN*
+
+# Configuration Files with Sensitive Data
+config.json
+config.yml
+config.yaml
+settings.json
+credentials.json
+auth.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.log
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Database Files
 *.db
+*.sqlite
+*.sqlite3
+auth.db
+conversations.db
+*.db-journal
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Node.js (for React frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+package-lock.json
+yarn.lock
+
+# React Build
+/build
+/chat-frontend/build
+
+# Testing
+/coverage
+.coverage
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Docker
+*.log
+docker-compose.override.yml
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# SSL Certificates
+ssl/
+*.csr
+*.ca-bundle
+
+# Backup Files
+*.backup
+*.bak
+*~
+
+# Lock Files (optional - uncomment if you want to ignore)
+# Pipfile.lock
+# poetry.lock
