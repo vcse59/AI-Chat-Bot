@@ -1,13 +1,3 @@
----
-title: "Building a Production-Ready AI ChatBot Platform with Real-Time Analytics"
-published: false
-description: "A comprehensive guide to building a full-stack AI chatbot with React, FastAPI, OAuth 2.0, WebSocket real-time messaging, and integrated analytics dashboard"
-tags: react, python, fastapi, ai, openai, websocket, oauth, microservices
-cover_image: 
-canonical_url: 
-series: 
----
-
 # Building a Production-Ready AI ChatBot Platform with Real-Time Analytics
 
 ## 🎯 Introduction
@@ -30,6 +20,9 @@ In this article, I'll walk you through the architecture and implementation of a 
 - **Database**: SQLite (easily upgradeable to PostgreSQL)
 - **Deployment**: Docker, Docker Compose
 - **Testing**: Pytest, end-to-end test suite
+
+**📦 Source Code:**
+- **GitHub Repository**: [https://github.com/vcse59/ConvoAI](https://github.com/vcse59/ConvoAI)
 
 ## 🏗️ System Architecture
 
