@@ -1,3 +1,14 @@
+# Load environment variables FIRST before any local imports
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Load root .env first (shared config)
+root_env = Path(__file__).parent.parent / ".env"
+load_dotenv(root_env)
+
+# Load local .env for service-specific overrides
+load_dotenv()
+
 from fastapi import FastAPI, WebSocket, Query, WebSocketException, status
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -21,7 +32,7 @@ Base.metadata.create_all(bind=engine)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Open ChatBot API with WebSocket Chat",
+    title="ConvoAI API with WebSocket Chat",
     description="A user-centric conversation API with real-time chat via WebSocket",
     version="2.0.0",
     docs_url="/docs",
@@ -47,7 +58,7 @@ app.include_router(api_router, prefix="/api/v1")
 async def root():
     """Root endpoint with API information"""
     return {
-        "message": "Welcome to Open ChatBot API",
+        "message": "Welcome to ConvoAI API",
         "version": "2.0.0",
         "features": [
             "User management and authentication",
@@ -126,8 +137,8 @@ async def websocket_conversation(
                     reason="User not found"
                 )
             
-            # Verify conversation belongs to this user
-            if conversation.user_id != user.id:
+            # Verify conversation belongs to this user (handle type mismatch)
+            if str(conversation.user_id) != str(user.id):
                 raise WebSocketException(
                     code=status.WS_1008_POLICY_VIOLATION,
                     reason="Access denied: conversation does not belong to this user"

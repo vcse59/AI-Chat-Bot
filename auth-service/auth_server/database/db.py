@@ -13,6 +13,10 @@ else:
     # Get the project root directory (auth-service folder)
     PROJECT_ROOT = Path(__file__).parent.parent.parent
     DB_PATH = PROJECT_ROOT / "auth.db"
+    
+    # Ensure the directory exists
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    
     SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 engine = create_engine(

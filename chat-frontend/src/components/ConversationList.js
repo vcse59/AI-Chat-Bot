@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useConversations } from '../hooks/useConversations';
 import './ConversationList.css';
 
-const ConversationList = ({ selectedConversationId, onSelectConversation }) => {
+const ConversationList = ({ selectedConversationId, onSelectConversation, onConversationDeleted }) => {
   const { conversations, loading, error, createConversation, deleteConversation } = useConversations();
   const [newConversationTitle, setNewConversationTitle] = useState('');
   const [showNewConversation, setShowNewConversation] = useState(false);
@@ -32,6 +32,10 @@ const ConversationList = ({ selectedConversationId, onSelectConversation }) => {
         await deleteConversation(conversationId);
         if (selectedConversationId === conversationId) {
           onSelectConversation(null);
+        }
+        // Notify parent component that a conversation was deleted
+        if (onConversationDeleted) {
+          onConversationDeleted();
         }
       } catch (err) {
         console.error('Failed to delete conversation:', err);

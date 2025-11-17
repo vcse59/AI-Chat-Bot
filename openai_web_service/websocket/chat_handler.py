@@ -10,6 +10,8 @@ from utilities.logging_utils import log_websocket_event, log_security_event
 from utilities.response_utils import create_websocket_response, create_error_response
 from utilities.validation_utils import sanitize_string
 from utilities.datetime_utils import get_utc_now
+from middleware.analytics_middleware import track_conversation, track_message, sync_user_profile
+import asyncio
 import os
 
 logger = logging.getLogger(__name__)
@@ -200,6 +202,13 @@ class WebSocketHandler:
             # Add websocket to conversation
             manager.add_to_conversation(websocket, conversation.id)
             
+            # Track conversation creation in analytics
+            asyncio.create_task(track_conversation(
+                conversation_id=str(conversation.id),
+                user_id=str(user_id or request.user_id),
+                action="created"
+            ))
+            
             return schemas.WebSocketResponse(
                 type="start_conversation",
                 success=True,
@@ -272,6 +281,22 @@ class WebSocketHandler:
                 }
             }
             
+            # Only track assistant messages (actual OpenAI interactions) in analytics
+            # User messages don't involve OpenAI API calls or token usage
+            if user_id:
+                # Convert response_time from milliseconds to seconds for analytics
+                response_time_seconds = result.get("response_time_ms", 0) / 1000.0 if result.get("response_time_ms") else None
+                
+                asyncio.create_task(track_message(
+                    message_id=str(result["ai_response"].id),
+                    conversation_id=str(request.conversation_id),
+                    user_id=str(user_id),
+                    role="assistant",
+                    token_count=result["ai_response"].tokens_used or 0,
+                    response_time=response_time_seconds,
+                    model_used=result.get("ai_response").model
+                ))
+            
             # Broadcast to conversation participants
             await manager.send_to_conversation(
                 json.dumps({
@@ -330,6 +355,14 @@ class WebSocketHandler:
                 user_id=user_id,
                 conversation_id=request.conversation_id
             )
+            
+            # Track conversation end in analytics  
+            if user_id:
+                asyncio.create_task(track_conversation(
+                    conversation_id=str(request.conversation_id),
+                    user_id=str(user_id),
+                    action="ended"
+                ))
             
             # Notify all participants
             await manager.send_to_conversation(

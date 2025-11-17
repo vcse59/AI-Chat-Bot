@@ -18,6 +18,19 @@ class UserActivity(Base):
     extra_data = Column(JSON, nullable=True)
 
 
+class UserProfile(Base):
+    """Track user profile information including roles"""
+    __tablename__ = "user_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, index=True, nullable=False)
+    role = Column(String, nullable=True)  # admin, manager, user
+    email = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class ConversationMetrics(Base):
     """Track conversation-level analytics"""
     __tablename__ = "conversation_metrics"

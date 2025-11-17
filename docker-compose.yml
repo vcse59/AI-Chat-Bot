@@ -10,11 +10,15 @@ services:
     environment:
       - PORT=8001
       - HOST=0.0.0.0
-      - DATABASE_URL=sqlite:///./data/auth.db
+      - DATABASE_URL=sqlite:///./data/chatbot.db
       - SECRET_KEY=${AUTH_SECRET_KEY:-your-secret-key-change-in-production}
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      # Admin user credentials (set in .env or use defaults)
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
     volumes:
-      - auth_data:/app/data
+      - shared_data:/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
@@ -35,14 +39,15 @@ services:
       - PORT=8000
       - HOST=0.0.0.0
       - RELOAD=false
+      - DATABASE_URL=sqlite:///./data/chatbot_main.db
       # Auth service URL
       - AUTH_SERVICE_URL=http://auth-server:8001
       - AUTH_SECRET_KEY=${AUTH_SECRET_KEY:-your-secret-key-change-in-production}
       # Set your OpenAI API key in .env file
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
-      # Mount data directory for SQLite database persistence
-      - ./data:/app/data
+      # Mount shared data directory for SQLite database persistence
+      - chatbot_data:/app/data
       # Mount logs directory
       - ./logs:/app/logs
     restart: unless-stopped
@@ -66,10 +71,11 @@ services:
     environment:
       - PORT=8002
       - HOST=0.0.0.0
+      - DATABASE_URL=sqlite:///./data/analytics.db
       - AUTH_SERVICE_URL=http://auth-server:8001
       - AUTH_SECRET_KEY=${AUTH_SECRET_KEY:-your-secret-key-change-in-production}
     volumes:
-      - analytics_data:/app
+      - analytics_data:/app/data
     restart: unless-stopped
     depends_on:
       - auth-server
@@ -120,13 +126,13 @@ services:
 
 # Create named volumes for data persistence
 volumes:
+  shared_data:
+    driver: local
   chatbot_data:
     driver: local
-  chatbot_logs:
-    driver: local
-  auth_data:
-    driver: local
   analytics_data:
+    driver: local
+  chatbot_logs:
     driver: local
 
 # Network for container communication

@@ -1,4 +1,15 @@
 """Analytics Service Main Application"""
+# Load environment variables FIRST before any local imports
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Load root .env first (shared config)
+root_env = Path(__file__).parent.parent / ".env"
+load_dotenv(root_env)
+
+# Load local .env for service-specific overrides
+load_dotenv()
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -24,7 +35,7 @@ Base.metadata.create_all(bind=engine)
 # Initialize FastAPI app
 app = FastAPI(
     title="Analytics Service",
-    description="Admin-only analytics and metrics tracking for AI Chat Bot Platform",
+    description="Admin-only analytics and metrics tracking for ConvoAI Platform",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"

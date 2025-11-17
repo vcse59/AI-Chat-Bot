@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "OAuth2 Authorization Server"
 authors = ["User"]
 readme = "README.md"
+packages = [{include = "auth_server"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -14,6 +15,7 @@ bcrypt = "^4.0.1"
 python-multipart = "^0.0.20"
 sqlalchemy = "^2.0.44"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-dotenv = "^1.0.0"
 
 [tool.poetry.scripts]
 start = "auth_server.main:start"

@@ -4,13 +4,14 @@ A comprehensive FastAPI application that provides OAuth 2.0 authenticated AI-pow
 
 ## 🌟 Overview
 
-The ChatBot Service is the main application component of the Open ChatBot platform, providing:
+The ChatBot Service is the main application component of the ConvoAI platform, providing:
 - **AI-Powered Conversations**: Integration with OpenAI's GPT models
 - **Real-time Communication**: WebSocket support for instant messaging
 - **OAuth 2.0 Security**: Token-based authentication with role-based access control
 - **Conversation Management**: Persistent storage of chat history
 - **User-Scoped Access**: Users can only access their own conversations
 - **Hash-Based IDs**: Secure, obfuscated identifiers for users and conversations
+- **Analytics Integration**: Middleware for tracking conversation metrics
 
 ## 🔐 OAuth 2.0 Integration
 
@@ -24,14 +25,14 @@ This service integrates with the Authorization Server for secure authentication:
 5. Response is returned to authenticated user
 
 ### Security Levels
-- **Public Endpoints**: No authentication required
+- **Public Endpoints**: No authentication required (health check)
 - **Authenticated Endpoints**: Valid JWT token required
 - **User-Scoped Endpoints**: Users can only access their own resources
 - **Admin Endpoints**: Admin role required
 
 ## ✨ Features
 
-### � Security & Authentication
+### 🔒 Security & Authentication
 - **OAuth 2.0 Integration** - JWT token validation
 - **Role-Based Access Control** - Admin, User, Manager roles
 - **User-Scoped Resources** - Strict ownership validation
@@ -51,104 +52,113 @@ This service integrates with the Authorization Server for secure authentication:
 - **Multi-user Support** - Handle multiple concurrent conversations
 - **Anonymous Chat** - Optional anonymous WebSocket connections
 
+### 📊 Analytics Integration
+- **Middleware Tracking** - Automatic metrics collection
+- **Conversation Events** - Track creation, messaging, and engagement
+- **User Activity** - Monitor user interactions
+- **Response Times** - Track API performance
+
 ### 🏗️ Architecture
-- **Microservices Design** - Separate auth and chat services
+- **Microservices Design** - Separate auth, chat, and analytics services
 - **Docker Ready** - Full containerization support
-- **Database Persistence** - SQLite with conversation history
+- **Database Persistence** - SQLite with absolute paths
 - **Modular Design** - Clean separation of concerns
 - **Async Support** - Full asynchronous operations
 
-## 🚀 Quick Start (Standalone)
+## 🚀 Quick Start
 
-**Note**: For full platform deployment with authentication, see the main [README.md](../README.md) at the project root.
+### Docker Deployment (Recommended)
 
-### 1. Installation
-
-```bash
-# Install dependencies
-pip install -e .
-
-# For development
-pip install -e .[dev]
-```
-
-### 2. Environment Setup
+Run with full platform from project root:
 
 ```bash
-# Set OpenAI API key (required for chat functionality)
-export OPENAI_API_KEY=your-openai-api-key-here
-
-# Optional configuration
-export HOST=0.0.0.0
-export PORT=8000
-export RELOAD=true
+docker-compose up openai_web_service
 ```
 
-### 3. Run the Application
+See main [README.md](../README.md) for complete Docker setup.
 
+### Local Development
+
+**Prerequisites:**
+- Python 3.12+
+- OpenAI API Key
+- Auth service running (for authentication)
+
+**Setup:**
+
+1. **Install dependencies:**
+   ```bash
+   cd openai_web_service
+   pip install -e .
+   
+   # For development
+   pip install -e .[dev]
+   ```
+
+2. **Configure environment:**
+   
+   Ensure root `.env` exists:
+   ```env
+   # ConvoAI/.env
+   AUTH_SECRET_KEY=your-secret-key-here
+   OPENAI_API_KEY=your-openai-key-here
+   ```
+   
+   Service `.env`:
+   ```env
+   # openai_web_service/.env
+   PORT=8000
+   HOST=0.0.0.0
+   AUTH_SERVICE_URL=http://localhost:8001
+   ANALYTICS_SERVICE_URL=http://localhost:8002
+   CORS_ORIGINS=http://localhost:3000
+   ```
+
+3. **Run the service:**
+   ```bash
+   # Method 1: Using uvicorn
+   uvicorn main:app --reload --port 8000
+   
+   # Method 2: Using Python directly
+   python main.py
+   ```
+
+**Using Platform Scripts** (from project root):
+
+**Windows:**
+```cmd
+scripts\windows\start-chat-service.bat
+```
+
+**Linux/Mac:**
 ```bash
-# Method 1: Using main module
-python -m openai_web_service.main
-
-# Method 2: Using uvicorn directly
-uvicorn openai_web_service.app:app --reload --host 0.0.0.0 --port 8000
-
-# Method 3: Using the app directly
-python openai_web_service/main.py
+scripts/linux-mac/start-chat-service.sh
 ```
 
-### 4. Access the API
+### Access Points
 
 - **API Documentation**: http://localhost:8000/docs
 - **Alternative Docs**: http://localhost:8000/redoc
 - **Health Check**: http://localhost:8000/health
-- **CRUD Endpoints**: http://localhost:8000/api/v1/
+- **WebSocket**: ws://localhost:8000/ws/{conversation_id}
 
-## 🐳 Docker Deployment
+### Database Configuration
 
-### Prerequisites
-- Docker installed on your system
-- Docker Compose installed (usually comes with Docker Desktop)
+Database is automatically created at `openai_web_service/data/chatbot.db` using absolute paths. No manual configuration needed.
 
-> **📝 Note**: The application includes automatic import resolution for both development and Docker environments. If you encounter import errors, the app will automatically fallback to the correct import method.
+To reset database:
 
-### Option 1: Docker Compose (Recommended)
-
-This is the easiest way to run the entire application with all services.
-
-#### 1. Quick Start with Docker Compose
-
-```bash
-# Clone and navigate to project root
-cd /path/to/Open-ChatBot
-
-# Set your OpenAI API key (required)
-export OPENAI_API_KEY=your-openai-api-key-here
-
-# Build and run all services
-docker-compose up --build
-
-# Or run in detached mode (background)
-docker-compose up -d --build
+**Windows:**
+```cmd
+del openai_web_service\data\chatbot.db
 ```
 
-#### 2. Environment Configuration
-
-Create a `.env` file in the project root (optional):
+**Linux/Mac:**
 ```bash
-# Copy the example environment file
-cp openai_web_service/.env.example .env
-
-# Edit the .env file with your settings
-OPENAI_API_KEY=your-openai-api-key-here
-PORT=8000
-HOST=0.0.0.0
-RELOAD=false
+rm openai_web_service/data/chatbot.db
 ```
 
-#### 3. Docker Compose Commands
-
-```bash
+Then restart the service to recreate.
 # Build and start services
 docker-compose up --build
 

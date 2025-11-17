@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Open ChatBot platform includes a comprehensive analytics system that tracks user activity, conversation metrics, message statistics, and API usage. This guide explains how to use and understand the analytics features.
+The ConvoAI platform includes a comprehensive analytics system that tracks user activity, conversation metrics, message statistics, and API usage. This guide explains how to use and understand the analytics features.
 
 ## Architecture
 

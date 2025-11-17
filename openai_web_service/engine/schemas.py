@@ -118,6 +118,7 @@ class ChatMessageBase(BaseModel):
     content: str
     model: Optional[str] = None
     tokens_used: Optional[int] = None
+    response_time: Optional[int] = None  # Response time in milliseconds
     message_metadata: Optional[Dict[str, Any]] = None
 
 class ChatMessageCreate(ChatMessageBase):
@@ -129,6 +130,7 @@ class ChatMessageCreateSimple(BaseModel):
     content: str
     model: Optional[str] = None
     tokens_used: Optional[int] = None
+    response_time: Optional[int] = None  # Response time in milliseconds
     message_metadata: Optional[Dict[str, Any]] = None
 
 class ChatMessageResponse(ChatMessageBase):

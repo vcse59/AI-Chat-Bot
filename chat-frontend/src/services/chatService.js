@@ -194,6 +194,34 @@ class ChatService {
   }
 
   /**
+   * Admin: Get all conversations from all users
+   * @returns {Promise} - Returns array of all conversations
+   */
+  async getAllConversationsAdmin() {
+    try {
+      const api = this._getAxiosInstance();
+      const response = await api.get('/api/v1/admin/conversations/');
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
+   * Admin: Delete any conversation
+   * @param {string} conversationId - Conversation hash ID
+   * @returns {Promise}
+   */
+  async deleteConversationAdmin(conversationId) {
+    try {
+      const api = this._getAxiosInstance();
+      await api.delete(`/api/v1/admin/conversations/${conversationId}`);
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
    * Handle API errors
    * @private
    */

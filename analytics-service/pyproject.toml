@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "analytics-service"
 version = "1.0.0"
-description = "Analytics and metrics tracking service for AI Chat Bot Platform"
-authors = ["AI Chat Bot Team"]
+description = "Analytics and metrics tracking service for ConvoAI Platform"
+authors = ["ConvoAI Team"]
 readme = "README.md"
+packages = [{include = "analytics"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -15,6 +16,7 @@ pydantic-settings = "^2.6.0"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-multipart = "^0.0.17"
 requests = "^2.32.3"
+python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"

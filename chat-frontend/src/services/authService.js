@@ -97,6 +97,25 @@ class AuthService {
   }
 
   /**
+   * Delete a user (admin-only)
+   * @param {string} username - Username to delete
+   * @returns {Promise} - Returns deletion confirmation
+   */
+  async deleteUser(username) {
+    try {
+      const response = await axios.delete(
+        `${AUTH_API_URL}/users/${username}`,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
    * Logout current user
    */
   logout() {

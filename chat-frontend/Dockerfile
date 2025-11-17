@@ -1,6 +1,9 @@
 # Build stage
 FROM node:18-alpine as build
 
+# Cache bust argument
+ARG CACHE_BUST=1
+
 WORKDIR /app
 
 # Copy package files
@@ -17,6 +20,9 @@ RUN npm run build
 
 # Production stage
 FROM nginx:alpine
+
+# Cache bust for production stage
+ARG CACHE_BUST=1
 
 # Copy built assets from build stage
 COPY --from=build /app/build /usr/share/nginx/html

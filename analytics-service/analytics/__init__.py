@@ -1,2 +1,2 @@
-"""Analytics Service for AI Chat Bot Platform"""
+"""Analytics Service for ConvoAI Platform"""
 __version__ = "1.0.0"

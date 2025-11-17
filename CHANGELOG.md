@@ -1,9 +1,36 @@
 # Changelog
 
-All notable changes to the Open ChatBot project will be documented in this file.
+All notable changes to the ConvoAI project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.1.0] - 2025-11-16
+
+### Added - Automatic Admin Setup
+- **Auto-Admin Creation on Startup**: Auth service now automatically creates admin user on first startup
+  - Eliminates need for manual SQL commands or bootstrap scripts
+  - Admin user created with credentials from environment variables
+  - Idempotent: Skips creation if admin already exists
+  - Assigns both 'admin' and 'user' roles automatically
+  - Logs creation status for verification
+- **Environment Variable Configuration**: New admin credential settings
+  - `ADMIN_USERNAME` (default: "admin")
+  - `ADMIN_PASSWORD` (default: "admin123")
+  - `ADMIN_EMAIL` (default: "admin@example.com")
+  - Configurable via .env file for custom credentials
+- **Startup Documentation**: New `STARTUP_GUIDE.md` with detailed automatic setup instructions
+- **Updated README**: Quick start section updated with admin auto-creation details
+
+### Changed
+- **Simplified Setup Process**: Reduced admin setup from 4 manual steps to automatic on first run
+- **Docker Compose Configuration**: Added admin environment variables to auth-server service
+- **Environment Template**: Updated `.env.example` with admin credential configuration
+
+### Improved
+- **User Experience**: New users can immediately access admin features without manual database operations
+- **Security**: Admin credentials configurable before first startup via environment variables
+- **Documentation**: Clear instructions for automatic admin setup and customization
 
 ## [1.0.0] - 2025-11-16
 

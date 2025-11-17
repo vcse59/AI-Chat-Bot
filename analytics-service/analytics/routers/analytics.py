@@ -312,7 +312,7 @@ async def track_api_usage_public(request: APIUsageTrackingRequest, db: Session =
 @router.post("/track/conversation-public")
 async def track_conversation_public(request: ConversationTrackingRequest, db: Session = Depends(get_db)):
     """Public endpoint for tracking conversations from other services"""
-    from analytics.models.analytics import ConversationMetrics
+    from analytics.models.analytics import ConversationMetrics, MessageMetrics
     
     if request.action == "created":
         conv = ConversationMetrics(
@@ -323,9 +323,15 @@ async def track_conversation_public(request: ConversationTrackingRequest, db: Se
         )
         db.add(conv)
     elif request.action == "deleted":
+        # Delete all message metrics for this conversation
+        db.query(MessageMetrics).filter(
+            MessageMetrics.conversation_id == request.conversation_id
+        ).delete()
+        
+        # Delete the conversation metrics
         db.query(ConversationMetrics).filter(
             ConversationMetrics.conversation_id == request.conversation_id
-        ).update({"status": "deleted"})
+        ).delete()
     
     db.commit()
     return {"status": "tracked"}
@@ -354,23 +360,236 @@ async def track_message_public(request: MessageTrackingRequest, db: Session = De
     ).first()
     
     if conv:
-        # Build update dict
-        updates = {"message_count": ConversationMetrics.message_count + 1}  # type: ignore
+        # Get current values
+        current_message_count = int(conv.message_count)  # type: ignore
+        current_total_tokens = int(conv.total_tokens)  # type: ignore
+        current_avg_response = float(conv.avg_response_time) if conv.avg_response_time is not None else 0.0  # type: ignore
         
-        if request.token_count:
-            updates["total_tokens"] = ConversationMetrics.total_tokens + request.token_count  # type: ignore
+        # Increment message count
+        new_message_count = current_message_count + 1
         
-        if request.response_time:
-            current_avg = float(conv.avg_response_time) if conv.avg_response_time else 0.0  # type: ignore
-            if current_avg == 0.0:
-                updates["avg_response_time"] = request.response_time  # type: ignore
+        # Add tokens
+        new_total_tokens = current_total_tokens + (request.token_count or 0)
+        
+        # Calculate new average response time (weighted average)
+        new_avg_response_time = current_avg_response
+        if request.response_time is not None and request.response_time > 0:
+            if current_avg_response == 0.0:
+                new_avg_response_time = request.response_time
             else:
-                updates["avg_response_time"] = (current_avg + request.response_time) / 2.0  # type: ignore
+                # Weighted average: (old_avg * old_count + new_value) / new_count
+                total_response_time = current_avg_response * current_message_count
+                new_avg_response_time = (total_response_time + request.response_time) / new_message_count
         
-        # Apply updates
+        # Update conversation
         db.query(ConversationMetrics).filter(
             ConversationMetrics.conversation_id == request.conversation_id
-        ).update(updates, synchronize_session=False)  # type: ignore
+        ).update({
+            "message_count": new_message_count,
+            "total_tokens": new_total_tokens,
+            "avg_response_time": new_avg_response_time,
+            "updated_at": datetime.utcnow()
+        }, synchronize_session=False)
     
     db.commit()
     return {"status": "tracked"}
+
+
+# Enhanced Analytics Endpoints
+
+@router.get("/metrics/by-role", response_model=List[dict])
+async def get_metrics_by_role(
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Get user metrics grouped by role.
+    
+    **Admin access required**
+    
+    Returns:
+        - User count per role
+        - Total conversations per role
+        - Total messages per role
+        - Total tokens per role
+        - Average response time per role
+    """
+    return AnalyticsService.get_user_metrics_by_role(db)
+
+
+@router.get("/users/detailed-metrics", response_model=List[dict])
+async def get_users_detailed_metrics(
+    user_id: Optional[str] = Query(None, description="Filter by specific user"),
+    limit: int = Query(100, ge=1, le=500, description="Maximum number of users"),
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Get detailed metrics for all users or a specific user.
+    
+    **Admin access required**
+    
+    Returns:
+        - User ID and username
+        - Role
+        - Total conversations
+        - Total messages
+        - Total tokens used
+        - Average response time
+        - First and last activity timestamps
+    """
+    return AnalyticsService.get_user_detailed_metrics(db, user_id=user_id, limit=limit)
+
+
+@router.get("/users/{user_id}/conversations", response_model=List[dict])
+async def get_user_conversations(
+    user_id: str,
+    limit: int = Query(50, ge=1, le=200, description="Maximum number of conversations"),
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all conversations for a specific user with metrics.
+    
+    **Admin access required**
+    
+    Returns conversation list with:
+        - Message count
+        - Total tokens
+        - Average response time
+        - Status and timestamps
+    """
+    return AnalyticsService.get_conversations_by_user(db, user_id=user_id, limit=limit)
+
+
+@router.get("/conversations/{conversation_id}/detailed", response_model=dict)
+async def get_conversation_detailed(
+    conversation_id: str,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Get detailed metrics for a specific conversation including all messages.
+    
+    **Admin access required**
+    
+    Returns:
+        - Conversation metadata
+        - Token usage
+        - Response times
+        - Complete message list with individual metrics
+    """
+    result = AnalyticsService.get_conversation_detailed_metrics(db, conversation_id=conversation_id)
+    if not result:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return result
+
+
+@router.get("/tokens/by-conversation", response_model=List[dict])
+async def get_token_usage_by_conversation(
+    user_id: Optional[str] = Query(None, description="Filter by user"),
+    limit: int = Query(50, ge=1, le=200, description="Maximum number of conversations"),
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Get token usage breakdown by conversation (sorted by highest usage).
+    
+    **Admin access required**
+    
+    Returns:
+        - Conversation ID
+        - User information
+        - Total tokens used
+        - Message count
+        - Average tokens per message
+    """
+    return AnalyticsService.get_token_usage_by_conversation(db, user_id=user_id, limit=limit)
+
+
+@router.get("/response-times/by-user", response_model=List[dict])
+async def get_response_times_by_user(
+    limit: int = Query(50, ge=1, le=200, description="Maximum number of users"),
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Get response time statistics by user.
+    
+    **Admin access required**
+    
+    Returns:
+        - User ID and username
+        - Average response time
+        - Min and max response times
+        - Total message count
+    """
+    return AnalyticsService.get_response_times_by_user(db, limit=limit)
+
+
+@router.post("/users/sync-profile")
+async def sync_user_profile(
+    user_id: str,
+    username: str,
+    role: Optional[str] = None,
+    email: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Public endpoint to sync user profile from other services.
+    
+    This should be called when:
+    - A new user is created
+    - User role is changed
+    - User information is updated
+    """
+    AnalyticsService.sync_user_profile(db, user_id=user_id, username=username, role=role, email=email)
+    return {"status": "synced", "user_id": user_id}
+
+
+@router.delete("/clear-all")
+async def clear_all_analytics(
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Clear all analytics data from the database.
+    
+    **Admin access required**
+    
+    This will delete:
+    - All user activities
+    - All conversation metrics
+    - All message metrics
+    - All API usage logs
+    - All daily stats
+    
+    WARNING: This action cannot be undone!
+    """
+    from analytics.models.analytics import (
+        UserActivity, ConversationMetrics, MessageMetrics, 
+        APIUsage, DailyStats
+    )
+    
+    # Delete all records from each table
+    deleted_counts = {
+        "user_activities": db.query(UserActivity).delete(),
+        "conversation_metrics": db.query(ConversationMetrics).delete(),
+        "message_metrics": db.query(MessageMetrics).delete(),
+        "api_usage": db.query(APIUsage).delete(),
+        "daily_stats": db.query(DailyStats).delete()
+    }
+    
+    db.commit()
+    
+    logger.info(f"Admin {current_user.username} cleared all analytics data: {deleted_counts}")
+    
+    return {
+        "message": "All analytics data cleared successfully",
+        "deleted_counts": deleted_counts,
+        "cleared_by": current_user.username,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+

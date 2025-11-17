@@ -143,6 +143,129 @@ class AnalyticsService {
   }
 
   /**
+   * Get user metrics grouped by role
+   * @returns {Promise} - Returns metrics by role
+   */
+  async getMetricsByRole() {
+    try {
+      const response = await axios.get(`${ANALYTICS_API_URL}/api/v1/analytics/metrics/by-role`, {
+        headers: authService.getAuthHeader(),
+      });
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
+   * Get detailed metrics for users
+   * @param {string} userId - Optional user ID to filter
+   * @param {number} limit - Maximum number of users
+   * @returns {Promise} - Returns detailed user metrics
+   */
+  async getUsersDetailedMetrics(userId = null, limit = 100) {
+    try {
+      const params = { limit };
+      if (userId) params.user_id = userId;
+      
+      const response = await axios.get(`${ANALYTICS_API_URL}/api/v1/analytics/users/detailed-metrics`, {
+        params,
+        headers: authService.getAuthHeader(),
+      });
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
+   * Get conversations for a specific user
+   * @param {string} userId - User ID
+   * @param {number} limit - Maximum number of conversations
+   * @returns {Promise} - Returns user's conversations with metrics
+   */
+  async getUserConversations(userId, limit = 50) {
+    try {
+      const response = await axios.get(`${ANALYTICS_API_URL}/api/v1/analytics/users/${userId}/conversations`, {
+        params: { limit },
+        headers: authService.getAuthHeader(),
+      });
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
+   * Get detailed metrics for a specific conversation
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise} - Returns conversation details with all messages
+   */
+  async getConversationDetailed(conversationId) {
+    try {
+      const response = await axios.get(`${ANALYTICS_API_URL}/api/v1/analytics/conversations/${conversationId}/detailed`, {
+        headers: authService.getAuthHeader(),
+      });
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
+   * Get token usage by conversation
+   * @param {string} userId - Optional user ID to filter
+   * @param {number} limit - Maximum number of conversations
+   * @returns {Promise} - Returns token usage breakdown
+   */
+  async getTokenUsageByConversation(userId = null, limit = 50) {
+    try {
+      const params = { limit };
+      if (userId) params.user_id = userId;
+      
+      const response = await axios.get(`${ANALYTICS_API_URL}/api/v1/analytics/tokens/by-conversation`, {
+        params,
+        headers: authService.getAuthHeader(),
+      });
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
+   * Get response times by user
+   * @param {number} limit - Maximum number of users
+   * @returns {Promise} - Returns response time statistics
+   */
+  async getResponseTimesByUser(limit = 50) {
+    try {
+      const response = await axios.get(`${ANALYTICS_API_URL}/api/v1/analytics/response-times/by-user`, {
+        params: { limit },
+        headers: authService.getAuthHeader(),
+      });
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
+   * Clear all analytics data (Admin only)
+   * @returns {Promise} - Returns confirmation of cleared data
+   */
+  async clearAllStats() {
+    try {
+      const response = await axios.delete(`${ANALYTICS_API_URL}/api/v1/analytics/clear-all`, {
+        headers: authService.getAuthHeader(),
+      });
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
    * Handle API errors
    * @private
    */

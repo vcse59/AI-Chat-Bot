@@ -86,6 +86,7 @@ class AnalyticsSummary(BaseModel):
     total_users: int
     active_users_today: int
     total_conversations: int
+    active_conversations: int
     total_messages: int
     total_tokens: int
     total_api_calls: int
@@ -98,3 +99,52 @@ class TimeRangeQuery(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     user_id: Optional[str] = None
+
+
+class UserMetricsByRole(BaseModel):
+    """User metrics grouped by role"""
+    role: str
+    user_count: int
+    total_conversations: int
+    total_messages: int
+    total_tokens: int
+    avg_response_time: float
+
+
+class UserDetailedMetrics(BaseModel):
+    """Detailed metrics for a specific user"""
+    user_id: str
+    username: str
+    role: Optional[str] = None
+    total_conversations: int
+    total_messages: int
+    total_tokens: int
+    avg_response_time: float
+    first_activity: Optional[datetime] = None
+    last_activity: Optional[datetime] = None
+
+
+class ConversationDetailedMetrics(BaseModel):
+    """Detailed metrics for a specific conversation"""
+    conversation_id: str
+    user_id: str
+    username: Optional[str] = None
+    message_count: int
+    total_tokens: int
+    avg_response_time: float
+    created_at: datetime
+    updated_at: datetime
+    status: str
+    messages: Optional[list] = None
+
+
+class MessageDetailedMetrics(BaseModel):
+    """Detailed metrics for messages"""
+    message_id: str
+    conversation_id: str
+    user_id: str
+    role: str
+    token_count: int
+    response_time: Optional[float] = None
+    model_used: Optional[str] = None
+    timestamp: datetime

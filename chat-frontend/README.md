@@ -1,12 +1,13 @@
 # Chat Frontend
 
-React-based chat application with OAuth 2.0 authentication and real-time messaging capabilities.
+React-based chat application with OAuth 2.0 authentication, real-time messaging, and analytics dashboard.
 
 ## Features
 
 - 🔐 **OAuth 2.0 Authentication**: Secure login/registration using JWT tokens
 - 💬 **Real-time Chat**: WebSocket-based messaging for instant communication
 - 📝 **Conversation Management**: Create, view, and delete conversations
+- 📊 **Analytics Dashboard**: View conversation metrics and statistics
 - 🎨 **Modern UI**: Responsive design with gradient themes
 - 🔄 **Auto-reconnect**: Automatic WebSocket reconnection on connection loss
 - 📱 **Mobile Responsive**: Works seamlessly on all device sizes
@@ -23,9 +24,16 @@ React-based chat application with OAuth 2.0 authentication and real-time messagi
 │  - Login/Register│      │  - JWT Tokens       │      │                 │
 │  - Chat UI      │      └──────────────────────┘      │  - Conversations│
 │  - WebSocket    │                                     │  - Messages     │
-│                 │──────────────────────────────────▶ │  - WebSocket    │
+│  - Analytics    │──────────────────────────────────▶ │  - WebSocket    │
 │                 │        Bearer Token Auth            │  - OpenAI       │
 └─────────────────┘                                     └─────────────────┘
+         │                                                        │
+         │               ┌──────────────────────┐                │
+         └──────────────▶│  Analytics (8002)    │◀───────────────┘
+                         │  - Metrics           │
+                         │  - Statistics        │
+                         │  - Conversations     │
+                         └──────────────────────┘
 ```
 
 ### Authentication Flow
@@ -71,11 +79,12 @@ chat-frontend/
 
 ## Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the `chat-frontend` directory:
 
 ```env
 REACT_APP_AUTH_API_URL=http://localhost:8001
 REACT_APP_CHAT_API_URL=http://localhost:8000
+REACT_APP_ANALYTICS_API_URL=http://localhost:8002
 REACT_APP_WS_URL=ws://localhost:8000
 ```
 
@@ -85,10 +94,12 @@ REACT_APP_WS_URL=ws://localhost:8000
 
 - Node.js 18+
 - npm or yarn
+- Backend services running (auth, chat, analytics)
 
 ### Install Dependencies
 
 ```bash
+cd chat-frontend
 npm install
 ```
 
@@ -99,6 +110,18 @@ npm start
 ```
 
 The app will run on `http://localhost:3000`
+
+**Using Platform Scripts** (from project root):
+
+**Windows:**
+```cmd
+scripts\windows\start-frontend.bat
+```
+
+**Linux/Mac:**
+```bash
+scripts/linux-mac/start-frontend.sh
+```
 
 ### Build for Production
 
@@ -238,6 +261,28 @@ Headers: { Authorization: "Bearer <token>" }
 **WebSocket Connection**
 ```javascript
 ws://localhost:8000/ws/{conversation_id}?token=<jwt_token>
+```
+
+### Analytics Service (Port 8002)
+
+All endpoints require `Authorization: Bearer <token>` header.
+
+**Get Analytics Summary**
+```javascript
+GET /analytics/summary
+Headers: { Authorization: "Bearer <token>" }
+```
+
+**Get Conversation Metrics**
+```javascript
+GET /analytics/conversations
+Headers: { Authorization: "Bearer <token>" }
+```
+
+**Get User Activity**
+```javascript
+GET /analytics/users/{user_id}/activity
+Headers: { Authorization: "Bearer <token>" }
 ```
 
 ## Features Implementation

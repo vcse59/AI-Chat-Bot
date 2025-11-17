@@ -1,10 +1,10 @@
 # Analytics Service
 
-**Admin-Only Analytics and Metrics Tracking for AI Chat Bot Platform**
+**Admin-Only Analytics and Metrics Tracking for ConvoAI Platform**
 
 ## Overview
 
-The Analytics Service is a dedicated microservice that provides comprehensive analytics and metrics tracking for the AI Chat Bot Platform. This service is **accessible only by users with admin role** and offers insights into:
+The Analytics Service is a dedicated microservice that provides comprehensive analytics and metrics tracking for the ConvoAI Platform. This service is **accessible only by users with admin role** and offers insights into:
 
 - User activity and engagement
 - Conversation metrics
@@ -32,6 +32,107 @@ The Analytics Service is a dedicated microservice that provides comprehensive an
 - Error rate calculation
 - Token usage tracking
 - Cost analysis
+
+## 🚀 Quick Start
+
+### Docker Deployment (Recommended)
+
+Run with full platform from project root:
+
+```bash
+docker-compose up analytics-service
+```
+
+See main [README.md](../README.md) for complete Docker setup.
+
+### Local Development
+
+**Prerequisites:**
+- Python 3.12+
+- Auth service running (for authentication)
+- Chat service running (sends metrics data)
+
+**Setup:**
+
+1. **Create virtual environment:**
+   
+   **Windows:**
+   ```cmd
+   cd analytics-service
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+   
+   **Linux/Mac:**
+   ```bash
+   cd analytics-service
+   python -m venv venv
+   source venv/bin/activate
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Configure environment:**
+   
+   Ensure root `.env` exists:
+   ```env
+   # ConvoAI/.env
+   AUTH_SECRET_KEY=your-secret-key-here
+   OPENAI_API_KEY=your-openai-key-here
+   ```
+   
+   Service `.env`:
+   ```env
+   # analytics-service/.env
+   PORT=8002
+   HOST=0.0.0.0
+   AUTH_SERVICE_URL=http://localhost:8001
+   CORS_ORIGINS=http://localhost:3000
+   ```
+
+4. **Run the service:**
+   ```bash
+   uvicorn main:app --reload --port 8002
+   ```
+
+**Using Platform Scripts** (from project root):
+
+**Windows:**
+```cmd
+scripts\windows\start-analytics-service.bat
+```
+
+**Linux/Mac:**
+```bash
+scripts/linux-mac/start-analytics-service.sh
+```
+
+### Access Points
+
+- **API Documentation**: http://localhost:8002/docs
+- **Alternative Docs**: http://localhost:8002/redoc
+- **Health Check**: http://localhost:8002/health
+
+### Database Configuration
+
+Database is automatically created at `analytics-service/data/analytics.db` using absolute paths. No manual configuration needed.
+
+To reset database:
+
+**Windows:**
+```cmd
+del analytics-service\data\analytics.db
+```
+
+**Linux/Mac:**
+```bash
+rm analytics-service/data/analytics.db
+```
+
+Then restart the service to recreate.
 
 ## Architecture
 

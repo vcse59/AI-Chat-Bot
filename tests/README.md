@@ -1,8 +1,57 @@
-# End-to-End Test Suite for Open ChatBot
+# End-to-End Test Suite for ConvoAI
 
-This directory contains comprehensive end-to-end tests for the entire Open ChatBot application stack.
+This directory contains comprehensive end-to-end tests for the entire ConvoAI application stack.
+
+## 🚀 Quick Start
+
+### Using Scripts (Recommended)
+
+**Windows:**
+```cmd
+# From project root
+scripts\windows\run-tests.bat
+```
+
+**Linux/Mac:**
+```bash
+# From project root
+scripts/linux-mac/run-tests.sh
+```
+
+### Manual Testing
+
+**Prerequisites:**
+- All services running (auth, chat, analytics, frontend)
+- Python 3.12+
+- Virtual environment activated
+
+**Run Tests:**
+
+```bash
+# From project root
+cd tests
+pip install -r requirements.txt
+
+# Run all tests
+pytest -v
+
+# Run specific test file
+pytest test_0_smoke.py -v
+pytest test_1_auth_service.py -v
+pytest test_2_chat_api.py -v
+pytest test_3_websocket.py -v
+pytest test_4_end_to_end.py -v
+
+# Run with coverage
+pytest --cov=. --cov-report=html
+```
 
 ## Test Coverage
+
+### 0. Smoke Tests (`test_0_smoke.py`)
+- ✅ Service Health Checks
+- ✅ Service Availability
+- ✅ Basic Connectivity
 
 ### 1. Authentication & Authorization Service Tests (`test_1_auth_service.py`)
 - ✅ User Registration
@@ -77,6 +126,66 @@ This directory contains comprehensive end-to-end tests for the entire Open ChatB
   - Multiple conversation creation
   - Rapid message sending
 
+### 5. Analytics Service Tests (`test_5_analytics.py`)
+- ✅ Analytics Health & Availability
+  - Service health checks
+- ✅ Analytics Event Tracking
+  - Conversation tracking
+  - Message tracking
+  - User activity tracking
+- ✅ Analytics Dashboard Endpoints
+  - Summary metrics
+  - Metrics by role
+  - Detailed user metrics
+  - Top users
+  - User activities
+  - Conversations list
+  - Token usage
+  - Response times
+- ✅ Access Control
+  - Admin-only access
+  - Non-admin restrictions
+- ✅ Silent Background Updates
+  - Quick response times
+  - Concurrent request handling
+
+### 6. Admin Features Tests (`test_6_admin_features.py`)
+- ✅ Admin Conversation Management
+  - View all conversations
+  - Delete any conversation
+  - Regular user restrictions
+- ✅ Admin User Management
+  - List all users
+  - Delete users
+  - Non-existent user handling
+  - Regular user restrictions
+- ✅ Admin Role Management
+  - List roles
+  - Create roles
+  - Regular user restrictions
+- ✅ Admin Registration
+  - Register new admins
+  - Verify admin privileges
+  - Regular user restrictions
+
+### 7. Database Integrity Tests (`test_7_database_integrity.py`)
+- ✅ Database Separation
+  - Auth and chat databases are separate
+  - Analytics database is separate
+  - Independent operation verification
+- ✅ User Data Isolation
+  - Conversation isolation between users
+  - Message isolation between users
+  - Cross-user access prevention
+- ✅ Cascade Operations
+  - Delete conversation removes messages
+  - User deletion impact
+  - Orphaned data handling
+- ✅ Data Consistency
+  - Conversation count consistency
+  - Analytics tracking consistency
+  - Cross-service data integrity
+
 ## Prerequisites
 
 Before running tests, ensure all services are running:
@@ -105,7 +214,13 @@ pip install -r requirements.txt
 ### Run All Tests
 
 ```bash
-# From the project root
+# Using the comprehensive test runner (recommended)
+python tests/run_all_tests.py
+
+# Stop on first failure
+python tests/run_all_tests.py --fail-fast
+
+# Using pytest directly
 pytest tests/ -v
 
 # Or from tests directory
@@ -115,17 +230,29 @@ pytest -v
 ### Run Specific Test Files
 
 ```bash
-# Authentication tests only
+# Smoke tests
+pytest tests/test_0_smoke.py -v
+
+# Authentication tests
 pytest tests/test_1_auth_service.py -v
 
-# Chat API tests only
+# Chat API tests
 pytest tests/test_2_chat_api.py -v
 
-# WebSocket tests only
+# WebSocket tests
 pytest tests/test_3_websocket.py -v
 
-# End-to-end tests only
+# End-to-end tests
 pytest tests/test_4_end_to_end.py -v
+
+# Analytics tests
+pytest tests/test_5_analytics.py -v
+
+# Admin features tests
+pytest tests/test_6_admin_features.py -v
+
+# Database integrity tests
+pytest tests/test_7_database_integrity.py -v
 ```
 
 ### Run Specific Test Classes
@@ -325,11 +452,13 @@ When adding new tests:
 
 ## Test Metrics
 
-- **Total Test Cases**: 50+
-- **Test Files**: 4
-- **Test Classes**: 15+
-- **Average Test Duration**: ~45 seconds (all tests)
+- **Total Test Cases**: 100+
+- **Test Files**: 8
+- **Test Classes**: 30+
+- **Average Test Duration**: ~2-3 minutes (all tests)
 - **Coverage Target**: >80%
+- **Services Covered**: Auth, Chat API, WebSocket, Analytics
+- **Feature Coverage**: Authentication, Conversations, Messages, Analytics, Admin, Database Integrity
 
 ## License
 

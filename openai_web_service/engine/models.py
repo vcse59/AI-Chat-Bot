@@ -32,6 +32,7 @@ class ChatMessage(Base):
     # OpenAI specific fields
     model = Column(String(100), nullable=True)
     tokens_used = Column(Integer, nullable=True)
+    response_time = Column(Integer, nullable=True)  # Response time in milliseconds
     
     # Metadata for additional context
     message_metadata = Column(JSON, nullable=True)

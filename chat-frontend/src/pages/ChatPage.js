@@ -48,9 +48,38 @@ const ChatPage = () => {
     if (showAnalytics) {
       // Auto-refresh analytics every 30 seconds
       interval = setInterval(loadAnalytics, 30000);
+      
+      // Load analytics immediately when panel opens
+      loadAnalytics();
     }
+    
+    // Listen for conversation and message changes
+    const handleConversationChange = (event) => {
+      console.log('ChatPage: Conversation changed:', event.detail);
+      if (showAnalytics) {
+        loadAnalytics();
+      }
+    };
+    
+    const handleMessageAdded = (event) => {
+      console.log('ChatPage: Message added:', event.detail);
+      if (showAnalytics) {
+        // Add a small delay to allow backend analytics tracking to complete
+        setTimeout(() => {
+          loadAnalytics();
+        }, 1000);
+      }
+    };
+    
+    if (showAnalytics) {
+      window.addEventListener('conversationChanged', handleConversationChange);
+      window.addEventListener('messageAdded', handleMessageAdded);
+    }
+    
     return () => {
       if (interval) clearInterval(interval);
+      window.removeEventListener('conversationChanged', handleConversationChange);
+      window.removeEventListener('messageAdded', handleMessageAdded);
     };
   }, [showAnalytics]);
 
@@ -85,6 +114,13 @@ const ChatPage = () => {
     return icons[activityType] || '📊';
   };
 
+  const handleConversationDeleted = async () => {
+    // Refresh analytics when a conversation is deleted
+    if (showAnalytics) {
+      await loadAnalytics();
+    }
+  };
+
   return (
     <div className="chat-page">
       <div className="chat-header">
@@ -111,6 +147,7 @@ const ChatPage = () => {
         <ConversationList
           selectedConversationId={selectedConversationId}
           onSelectConversation={setSelectedConversationId}
+          onConversationDeleted={handleConversationDeleted}
         />
         <ChatWindow conversationId={selectedConversationId} />
         
@@ -119,9 +156,18 @@ const ChatPage = () => {
           <div className="analytics-panel">
             <div className="analytics-panel-header">
               <h2>📊 Analytics</h2>
-              <button onClick={loadAnalytics} className="refresh-btn" disabled={analyticsLoading}>
-                🔄 {analyticsLoading ? 'Loading...' : 'Refresh'}
-              </button>
+              <div className="analytics-panel-actions">
+                <button 
+                  onClick={() => navigate('/analytics')} 
+                  className="full-analytics-btn"
+                  title="Open full analytics dashboard with filters"
+                >
+                  🔍 Full Dashboard
+                </button>
+                <button onClick={loadAnalytics} className="refresh-btn" disabled={analyticsLoading}>
+                  🔄 {analyticsLoading ? 'Loading...' : 'Refresh'}
+                </button>
+              </div>
             </div>
             
             {analyticsLoading && !analyticsData ? (

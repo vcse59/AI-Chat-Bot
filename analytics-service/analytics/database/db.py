@@ -2,12 +2,22 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from pathlib import Path
+import os
 
-# Get the project root directory
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-DB_PATH = PROJECT_ROOT / "analytics.db"
+# Use DATABASE_URL from environment if available, otherwise use default path
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+if DATABASE_URL:
+    SQLALCHEMY_DATABASE_URL = DATABASE_URL
+else:
+    # Get the project root directory
+    PROJECT_ROOT = Path(__file__).parent.parent.parent
+    DB_PATH = PROJECT_ROOT / "data" / "analytics.db"
+    
+    # Ensure the directory exists
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    
+    SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, 

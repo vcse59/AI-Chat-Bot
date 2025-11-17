@@ -53,6 +53,15 @@ async def login_for_access_token(
         user_agent=request.headers.get("user-agent") if request else None
     ))
     
+    # Sync user profile with analytics (ensure role is up to date)
+    user_role = "admin" if any(role.name == "admin" for role in user.roles) else "user"
+    asyncio.create_task(_sync_user_profile(
+        user_id=user.id,
+        username=user.username,
+        role=user_role,
+        email=user.email
+    ))
+    
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register", response_model=schemas.UserResponse)
@@ -98,6 +107,14 @@ async def register_user(
         activity_type="register",
         ip_address=request.client.host if request else None,
         user_agent=request.headers.get("user-agent") if request else None
+    ))
+    
+    # Sync user profile with analytics (including role)
+    asyncio.create_task(_sync_user_profile(
+        user_id=db_user.id,
+        username=db_user.username,
+        role="user",
+        email=db_user.email
     ))
     
     return {"message": "User registered successfully"}
@@ -147,6 +164,14 @@ async def register_admin_user(
     db.commit()
     db.refresh(db_user)
     
+    # Sync admin user profile with analytics (including admin role)
+    asyncio.create_task(_sync_user_profile(
+        user_id=db_user.id,
+        username=db_user.username,
+        role="admin",
+        email=db_user.email
+    ))
+    
     return {"message": "Admin user created successfully"}
 
 async def _track_user_activity(user_id: str, username: str, activity_type: str,
@@ -167,4 +192,21 @@ async def _track_user_activity(user_id: str, username: str, activity_type: str,
             )
     except Exception as e:
         logger.debug(f"Analytics tracking failed (non-critical): {e}")
+
+
+async def _sync_user_profile(user_id: str, username: str, role: str = None, email: str = None):
+    """Helper function to sync user profile with analytics service"""
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            await client.post(
+                f"{ANALYTICS_SERVICE_URL}/api/v1/analytics/users/sync-profile",
+                params={
+                    "user_id": user_id,
+                    "username": username,
+                    "role": role,
+                    "email": email
+                }
+            )
+    except Exception as e:
+        logger.debug(f"User profile sync failed (non-critical): {e}")
 

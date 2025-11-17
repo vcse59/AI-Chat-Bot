@@ -4,9 +4,12 @@ from typing import List, Optional
 from engine.database import get_database
 from engine import schemas, crud
 from security import get_current_user, get_current_active_user, require_admin, CurrentUser
-from middleware.analytics_middleware import track_conversation, track_message
+from middleware.analytics_middleware import track_conversation, track_message, sync_user_profile, track_user_activity
 import asyncio
+import time
+import logging
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Dependency to get database session
@@ -17,66 +20,14 @@ def get_db():
     finally:
         db.close()
 
-# User CRUD endpoints
-@router.post("/users/", response_model=schemas.UserResponse, tags=["users"])
-async def create_user(
-    user: schemas.UserCreate, 
-    db: Session = Depends(get_db),
-    current_user: CurrentUser = Depends(require_admin)
-):
-    """Create a new user (Admin only)"""
-    # Check if user already exists
-    existing_user = crud.get_user_by_email(db, email=user.email)
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    existing_username = crud.get_user_by_username(db, username=user.username)
-    if existing_username:
-        raise HTTPException(status_code=400, detail="Username already taken")
-    
-    return crud.create_user(db=db, user=user)
-
-@router.get("/users/", response_model=List[schemas.UserResponse], tags=["users"])
-async def read_users(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db),
-    current_user: CurrentUser = Depends(require_admin)
-):
-    """Get all users with pagination (Admin only)"""
-    users = crud.get_users(db, skip=skip, limit=limit)
-    return users
-
-@router.get("/users/{user_id}", response_model=schemas.UserResponse, tags=["users"])
-async def read_user(
-    user_id: str, 
-    db: Session = Depends(get_db),
-    current_user: Optional[CurrentUser] = Depends(get_current_user)
-):
-    """Get a specific user by ID (Authenticated users can view)"""
-    db_user = crud.get_user(db, user_id=user_id)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
-
-@router.put("/users/{user_id}", response_model=schemas.UserResponse, tags=["users"])
-async def update_user(user_id: str, user: schemas.UserUpdate, db: Session = Depends(get_db)):
-    """Update a user"""
-    db_user = crud.update_user(db, user_id=user_id, user=user)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
-
-@router.delete("/users/{user_id}", tags=["users"])
-async def delete_user(user_id: str, db: Session = Depends(get_db)):
-    """Delete a user"""
-    success = crud.delete_user(db, user_id=user_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"message": "User deleted successfully"}
-
-
-
+# Note: User CRUD operations are handled by auth-service
+# Auth-service provides the following endpoints:
+# - POST   /api/v1/users/           - Create user
+# - GET    /api/v1/users/           - List all users (admin only)
+# - GET    /api/v1/users/me         - Get current user
+# - GET    /api/v1/users/{username} - Get specific user
+# - PUT    /api/v1/users/{username} - Update user
+# - DELETE /api/v1/users/{username} - Delete user (admin only)
 
 
 # Message endpoints for conversations
@@ -99,7 +50,7 @@ async def create_message(
         raise HTTPException(status_code=404, detail="User not found")
     
     # Users can only add messages to their own conversations unless they're admin
-    if not current_user.is_admin() and user.id != conversation.user_id:
+    if not current_user.is_admin() and str(user.id) != str(conversation.user_id):
         raise HTTPException(status_code=403, detail="Access denied: Can only add messages to your own conversations")
     
     # Create the full message with conversation_id
@@ -113,15 +64,18 @@ async def create_message(
     )
     created_message = crud.create_message(db=db, message=full_message)
     
-    # Track message creation in analytics
-    asyncio.create_task(track_message(
-        message_id=created_message.id,
-        conversation_id=conversation_id,
-        user_id=user.id,
-        role=message.role,
-        token_count=message.tokens_used or 0,
-        model_used=message.model
-    ))
+    # Only track assistant messages (actual OpenAI interactions) in analytics
+    # User messages via REST API don't involve OpenAI calls, so we don't track them
+    if message.role == "assistant" and message.tokens_used:
+        asyncio.create_task(track_message(
+            message_id=str(created_message.id),
+            conversation_id=str(conversation_id),
+            user_id=str(user.id),
+            role=message.role,
+            token_count=message.tokens_used or 0,
+            response_time=None,  # REST API doesn't have OpenAI response time
+            model_used=message.model
+        ))
     
     return created_message
 
@@ -145,7 +99,7 @@ async def read_conversation_messages(
         raise HTTPException(status_code=404, detail="User not found")
     
     # Users can only view messages from their own conversations unless they're admin
-    if not current_user.is_admin() and user.id != conversation.user_id:
+    if not current_user.is_admin() and str(user.id) != str(conversation.user_id):
         raise HTTPException(status_code=403, detail="Access denied: Can only view messages from your own conversations")
     
     messages = crud.get_conversation_messages(db, conversation_id=conversation_id, skip=skip, limit=limit)
@@ -187,10 +141,22 @@ async def create_user_conversation(
     conversation.user_id = user.id
     created_conversation = crud.create_conversation(db=db, conversation=conversation)
     
+    # Sync user profile with analytics (include role info from token if available)
+    user_role = None
+    if hasattr(current_user, 'roles') and current_user.roles:
+        user_role = "admin" if "admin" in current_user.roles else "user"
+    
+    asyncio.create_task(sync_user_profile(
+        user_id=user.id,
+        username=user.username,
+        role=user_role,
+        email=user.email if hasattr(user, 'email') else None
+    ))
+    
     # Track conversation creation in analytics
     asyncio.create_task(track_conversation(
-        conversation_id=created_conversation.id,
-        user_id=user.id,
+        conversation_id=str(created_conversation.id),
+        user_id=str(user.id),
         action="created"
     ))
     
@@ -253,9 +219,11 @@ async def reconnect_to_conversation(
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
-    # Verify user owns this conversation
-    if conversation.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
+    # Admins can reconnect to any conversation, non-admins must own it
+    if not current_user.is_admin():
+        # Verify user owns this conversation - compare as strings using user.id not path param
+        if str(conversation.user_id) != str(user.id):
+            raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
     
     # Update conversation status to active if it was ended
     if conversation.status == schemas.ConversationStatus.ENDED:
@@ -286,9 +254,11 @@ async def validate_conversation_access(
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
-    # Check ownership
-    if conversation.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
+    # Admins can validate any conversation, non-admins must own it
+    if not current_user.is_admin():
+        # Check ownership - compare as strings using user.id not path param
+        if str(conversation.user_id) != str(user.id):
+            raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
     
     return {
         "valid": True,
@@ -342,8 +312,11 @@ async def end_user_conversation(
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
-    if conversation.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
+    # Admins can end any conversation, non-admins must own it
+    if not current_user.is_admin():
+        # Compare as strings and use user.id not path parameter user_id
+        if str(conversation.user_id) != str(user.id):
+            raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
     
     # End the conversation
     db_conversation = crud.end_conversation(db, conversation_id=conversation_id)
@@ -357,6 +330,10 @@ async def delete_user_conversation(
     current_user: CurrentUser = Depends(get_current_active_user)
 ):
     """Delete a conversation for a specific user (Own conversation or Admin)"""
+    logger.info(f"=== DELETE ENDPOINT CALLED ===")
+    logger.info(f"Path params - user_id: {user_id}, conversation_id: {conversation_id}")
+    logger.info(f"Current user - username: {current_user.username}, is_admin: {current_user.is_admin()}, roles: {current_user.roles}")
+    
     # Get user by username first (since user_id in path might be username)
     user = crud.get_user_by_username(db, user_id)
     if not user:
@@ -366,17 +343,25 @@ async def delete_user_conversation(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Users can only delete their own conversations unless they're admin
-    if not current_user.is_admin() and current_user.username != user.username:
-        raise HTTPException(status_code=403, detail="Access denied: Can only delete your own conversations")
-    
-    # Verify conversation exists and user owns it
+    # Verify conversation exists
     conversation = crud.get_conversation(db, conversation_id=conversation_id)
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
-    if conversation.user_id != user.id:
-        raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
+    # Admins can delete any conversation, regular users can only delete their own
+    logger.info(f"Delete check - current_user: {current_user.username}, roles: {current_user.roles}, is_admin: {current_user.is_admin()}")
+    logger.info(f"Delete check - target_user: {user.username}, conversation_owner: {conversation.user_id}")
+    
+    if not current_user.is_admin():
+        # Non-admin users must own the conversation
+        if current_user.username != user.username:
+            raise HTTPException(status_code=403, detail="Access denied: Can only delete your own conversations")
+        
+        # Verify ownership - compare as strings to handle type mismatches
+        if str(conversation.user_id) != str(user.id):
+            raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
+    else:
+        logger.info("Admin user - bypassing ownership checks")
     
     # Delete the conversation
     success = crud.delete_conversation(db, conversation_id=conversation_id)
@@ -386,7 +371,7 @@ async def delete_user_conversation(
     # Track conversation deletion in analytics
     asyncio.create_task(track_conversation(
         conversation_id=conversation_id,
-        user_id=user.id,
+        user_id=str(user.id),
         action="deleted"
     ))
     
@@ -419,3 +404,44 @@ async def get_user_conversation_stats(
     
     stats = crud.get_conversation_stats(db, conversation_id=conversation_id)
     return stats
+
+
+# Admin-only endpoints
+@router.get("/admin/conversations/", response_model=List[schemas.ConversationResponse], tags=["admin"])
+async def get_all_conversations_admin(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(require_admin)
+):
+    """Get all conversations across all users (Admin only)"""
+    # Get all conversations without user filtering (user_id=None gets all)
+    conversations = crud.get_conversations(db, skip=skip, limit=limit, user_id=None)
+    return conversations
+
+
+@router.delete("/admin/conversations/{conversation_id}", tags=["admin"])
+async def delete_conversation_admin(
+    conversation_id: str,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(require_admin)
+):
+    """Delete any conversation regardless of owner (Admin only)"""
+    # Verify conversation exists
+    conversation = crud.get_conversation(db, conversation_id=conversation_id)
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    # Admin can delete any conversation - no ownership check needed
+    success = crud.delete_conversation(db, conversation_id=conversation_id)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete conversation")
+    
+    # Track conversation deletion in analytics
+    asyncio.create_task(track_conversation(
+        conversation_id=str(conversation_id),
+        user_id=str(conversation.user_id),
+        action="deleted"
+    ))
+    
+    return {"message": "Conversation deleted successfully by admin", "conversation_id": conversation_id}

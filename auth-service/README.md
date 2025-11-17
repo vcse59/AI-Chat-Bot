@@ -1,10 +1,10 @@
 # OAuth2 Authorization Server
 
-A FastAPI-based OAuth2 authorization server that handles user authentication, token issuance, and role-based access control. This service provides JWT tokens for the Open ChatBot platform.
+A FastAPI-based OAuth2 authorization server that handles user authentication, token issuance, and role-based access control. This service provides JWT tokens for the ConvoAI platform.
 
 ## 🌟 Overview
 
-This authorization server is a critical component of the Open ChatBot platform, providing:
+This authorization server is a critical component of the ConvoAI platform, providing:
 - User authentication and authorization
 - JWT token generation and validation
 - Role-based access control (RBAC)
@@ -96,21 +96,115 @@ This authorization server integrates with the ChatBot service through shared JWT
 User → Auth Server → JWT Token → ChatBot Service → Validates Token → Access Granted
 ```
 
-## Installation
+## 🚀 Quick Start
 
-1. Make sure you have Poetry installed:
+### Docker Deployment
+
+The service runs automatically with Docker Compose from the project root:
+
 ```bash
-pip install poetry
+docker-compose up auth-service
 ```
+
+### Local Development
+
+**Prerequisites:**
+- Python 3.12+
+- Poetry or pip
+
+**Option 1: Using Poetry (Recommended)**
+
+1. Install dependencies:
+   ```bash
+   cd auth-service
+   poetry install
+   ```
+
+2. Run the server:
+   ```bash
+   poetry run start
+   ```
+
+**Option 2: Using Virtual Environment**
+
+1. Create and activate virtual environment:
+   
+   **Windows:**
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+   
+   **Linux/Mac:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   ```
 
 2. Install dependencies:
-```bash
-poetry install
+   ```bash
+   pip install -r pyproject.toml  # or use poetry
+   ```
+
+3. Run the server:
+   ```bash
+   uvicorn auth_server.main:app --reload --port 8001
+   ```
+
+**Using Platform Scripts** (from project root):
+
+**Windows:**
+```cmd
+scripts\windows\start-auth-service.bat
 ```
 
-3. The database file (`auth.db`) will be automatically created in the `auth-service` directory when you first run the server.
+**Linux/Mac:**
+```bash
+scripts/linux-mac/start-auth-service.sh
+```
 
-## Running Tests
+The server will be available at `http://localhost:8001`. Access interactive API documentation at `http://localhost:8001/docs`.
+
+### Environment Configuration
+
+This service requires `AUTH_SECRET_KEY` from the root `.env` file:
+
+```env
+# Root .env (AI-Chat-Bot/.env)
+AUTH_SECRET_KEY=your-secret-key-here
+OPENAI_API_KEY=your-openai-key-here
+```
+
+Service-specific configuration in `auth-service/.env`:
+
+```env
+PORT=8001
+HOST=0.0.0.0
+CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+```
+
+**Note:** Database path is automatically set to absolute path (`auth-service/auth.db`). No `DATABASE_URL` configuration needed.
+
+### Create Admin User
+
+**Windows:**
+```cmd
+scripts\windows\setup-admin.bat
+```
+
+**Linux/Mac:**
+```bash
+scripts/linux-mac/setup-admin.sh
+```
+
+Default credentials:
+- Username: `admin`
+- Password: `admin123`
+- Email: `admin@example.com`
+
+**Change the admin password immediately after first login!**
+
+## 🧪 Testing
 
 Run the full test suite:
 ```bash
@@ -129,16 +223,17 @@ Run tests with verbose output:
 poetry run pytest -v
 ```
 
-## Usage
+**Using Test Runner Scripts** (from project root):
 
-Start the server:
-```bash
-poetry run start
+**Windows:**
+```cmd
+scripts\windows\run-tests.bat
 ```
 
-The server will be available at `http://localhost:8000`. You can access the interactive API documentation at `http://localhost:8000/docs`.
-
-## API Endpoints and Examples
+**Linux/Mac:**
+```bash
+scripts/linux-mac/run-tests.sh
+```
 
 ### Authentication
 
@@ -211,7 +306,7 @@ curl -X PUT "http://localhost:8000/roles/username" \
   }'
 ```
 
-## Response Examples
+## 📋 API Endpoints and Examples
 
 ### Successful Authentication
 ```json

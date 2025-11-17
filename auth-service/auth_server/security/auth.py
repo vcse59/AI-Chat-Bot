@@ -34,7 +34,7 @@ from ..models.user import User
 from ..database import get_db
 
 # Configuration - Load from environment variables
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")  # Use env var in production
+SECRET_KEY = os.getenv("AUTH_SECRET_KEY", "your-secret-key-here")  # Use env var in production
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 

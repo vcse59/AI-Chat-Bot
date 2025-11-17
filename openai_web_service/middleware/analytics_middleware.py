@@ -83,6 +83,23 @@ async def track_user_activity(user_id: str, username: str, activity_type: str,
         logger.debug(f"Activity tracking failed (non-critical): {e}")
 
 
+async def sync_user_profile(user_id: str, username: str, role: str | None = None, email: str | None = None):
+    """Sync user profile with analytics service"""
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            await client.post(
+                f"{ANALYTICS_SERVICE_URL}/api/v1/analytics/users/sync-profile",
+                params={
+                    "user_id": user_id,
+                    "username": username,
+                    "role": role,
+                    "email": email
+                }
+            )
+    except Exception as e:
+        logger.debug(f"User profile sync failed (non-critical): {e}")
+
+
 async def track_conversation(conversation_id: str, user_id: str, action: str):
     """Track conversation creation/deletion"""
     try:

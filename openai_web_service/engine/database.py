@@ -1,10 +1,22 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from pathlib import Path
 import os
 
-# SQLite database URL
-SQLALCHEMY_DATABASE_URL = "sqlite:///./openai_chatbot.db"
+# Use DATABASE_URL from environment if available, otherwise use default path
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL:
+    SQLALCHEMY_DATABASE_URL = DATABASE_URL
+else:
+    # Default to local database for development
+    # Use absolute path relative to the service directory
+    service_dir = Path(__file__).parent.parent  # openai_web_service directory
+    data_dir = service_dir / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    db_path = data_dir / "chatbot.db"
+    SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path}"
 # For production, you might want to use PostgreSQL:
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 

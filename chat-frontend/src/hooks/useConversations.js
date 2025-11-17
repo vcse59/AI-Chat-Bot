@@ -6,9 +6,9 @@ export const useConversations = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const loadConversations = async () => {
+  const loadConversations = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const data = await chatService.getConversations();
       setConversations(data);
@@ -16,12 +16,31 @@ export const useConversations = () => {
       setError(err.message);
       console.error('Error loading conversations:', err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     loadConversations();
+
+    // Listen for external conversation changes (e.g., admin deletions)
+    const handleExternalConversationChange = (event) => {
+      const { action, conversationId } = event.detail;
+      
+      if (action === 'deleted') {
+        // Remove conversation from list without API call
+        setConversations(prev => prev.filter(c => c.id !== conversationId));
+      } else {
+        // For other actions, silently refresh the list
+        loadConversations(true);
+      }
+    };
+
+    window.addEventListener('conversationDeleted', handleExternalConversationChange);
+
+    return () => {
+      window.removeEventListener('conversationDeleted', handleExternalConversationChange);
+    };
   }, []);
 
   const createConversation = async (title) => {
@@ -29,6 +48,12 @@ export const useConversations = () => {
       setError(null);
       const newConversation = await chatService.createConversation(title);
       setConversations(prev => [newConversation, ...prev]);
+      
+      // Trigger analytics update event
+      window.dispatchEvent(new CustomEvent('conversationChanged', { 
+        detail: { action: 'created', conversationId: newConversation.id }
+      }));
+      
       return newConversation;
     } catch (err) {
       setError(err.message);
@@ -42,6 +67,11 @@ export const useConversations = () => {
       setError(null);
       await chatService.deleteConversation(conversationId);
       setConversations(prev => prev.filter(c => c.id !== conversationId));
+      
+      // Trigger analytics update event
+      window.dispatchEvent(new CustomEvent('conversationChanged', { 
+        detail: { action: 'deleted', conversationId }
+      }));
     } catch (err) {
       setError(err.message);
       console.error('Error deleting conversation:', err);
@@ -54,6 +84,12 @@ export const useConversations = () => {
       setError(null);
       const updated = await chatService.updateConversation(conversationId, data);
       setConversations(prev => prev.map(c => c.id === conversationId ? updated : c));
+      
+      // Trigger analytics update event
+      window.dispatchEvent(new CustomEvent('conversationChanged', { 
+        detail: { action: 'updated', conversationId }
+      }));
+      
       return updated;
     } catch (err) {
       setError(err.message);

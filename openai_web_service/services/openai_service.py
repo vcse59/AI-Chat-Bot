@@ -97,6 +97,9 @@ class OpenAIConversationService:
             if conversation.status != "active":
                 raise ValueError("Conversation is not active")
             
+            # Record start time for response time tracking
+            start_time = get_utc_now()
+            
             # Save user message
             user_message = schemas.ChatMessageCreate(
                 conversation_id=conversation_id,
@@ -122,13 +125,18 @@ class OpenAIConversationService:
             # Call OpenAI API
             response = await self._call_openai_api(openai_messages)
             
-            # Save AI response
+            # Calculate total response time
+            end_time = get_utc_now()
+            response_time_ms = int((end_time - start_time).total_seconds() * 1000)
+            
+            # Save AI response with response time
             ai_message = schemas.ChatMessageCreate(
                 conversation_id=conversation_id,
                 role=schemas.MessageRole.ASSISTANT,
                 content=response["content"],
                 model=self.model,
                 tokens_used=response.get("tokens_used"),
+                response_time=response_time_ms,
                 metadata=response.get("metadata")
             )
             saved_ai_message = crud.create_message(db, message=ai_message)
@@ -138,7 +146,8 @@ class OpenAIConversationService:
             return {
                 "user_message": saved_user_message,
                 "ai_response": saved_ai_message,
-                "conversation_id": conversation_id
+                "conversation_id": conversation_id,
+                "response_time_ms": response_time_ms
             }
             
         except Exception as e:

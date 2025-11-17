@@ -74,6 +74,11 @@ export const useChat = (conversationId) => {
             }
           ];
         });
+        
+        // Trigger analytics update event
+        window.dispatchEvent(new CustomEvent('messageAdded', { 
+          detail: { conversationId, messageCount: 2 }
+        }));
       } else if (data.type === 'message_broadcast' && data.data) {
         // Handle broadcast messages from other clients
         const { user_message, ai_response } = data.data;
