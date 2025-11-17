@@ -88,6 +88,7 @@ Welcome to the ConvoAI documentation hub. This directory contains all comprehens
 
 - [Main Project README](../README.md) - Start here for project overview
 - [Scripts Documentation](../scripts/README.md) - Platform-specific management scripts
+- [Utility Scripts](../utils/README.md) - Database utilities and standalone test scripts
 - [Tests Documentation](../tests/README.md) - Testing suite documentation
 
 ## 🔍 Finding What You Need

@@ -124,6 +124,15 @@ ConvoAI/
 │   ├── CHANGELOG.md              # Version history
 │   └── ... (all other documentation)
 │
+├── utils/                        # Utility and migration scripts
+│   ├── check_roles.py            # Check user roles
+│   ├── list_users.py             # List all users
+│   ├── migrate_to_single_db.py   # Database migration
+│   ├── test_analytics_flow.py    # Test analytics flow
+│   ├── test_auth_flow.py         # Test auth flow
+│   ├── test_conversation.py      # Test conversations
+│   └── README.md                 # Utils documentation
+│
 ├── scripts/                      # Platform-specific service management scripts
 │   ├── windows/                  # Windows scripts (.bat)
 │   │   ├── setup-venv.bat        # Create virtual environments
@@ -1078,6 +1087,7 @@ curl http://localhost:8000/conversations/ \
 
 - [Quick Start Local Development](./docs/QUICK_START_LOCAL.md) ⭐ **NEW** - Detailed local setup guide
 - [Scripts Documentation](./scripts/README.md) - Platform-specific management scripts
+- [Utility Scripts](./utils/README.md) - Database utilities and standalone test scripts
 - [Frontend README](./chat-frontend/README.md)
 - [Auth Server README](./auth-service/README.md)
 - [ChatBot Service README](./openai_web_service/README.md)
