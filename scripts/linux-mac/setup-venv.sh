@@ -33,7 +33,7 @@ echo
 
 # 2. Chat Service (OpenAI Web Service)
 echo "2. Setting up Chat Service virtual environment..."
-cd "$PROJECT_ROOT/openai_web_service"
+cd "$PROJECT_ROOT/chat-service"
 if [ -d "venv" ]; then
     echo "   Removing existing venv..."
     rm -rf venv
@@ -92,3 +92,4 @@ echo "Next steps:"
 echo "  1. Run: ./scripts/start-all-services.sh"
 echo "  2. Access the app at http://localhost:3000"
 echo
+

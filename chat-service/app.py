@@ -232,7 +232,7 @@ if __name__ == "__main__":
     logger.info("Make sure to set OPENAI_API_KEY environment variable for chat functionality")
     
     uvicorn.run(
-        "openai_web_service.app:app", 
+        "chat_service.app:app", 
         host=host, 
         port=port, 
         reload=True,

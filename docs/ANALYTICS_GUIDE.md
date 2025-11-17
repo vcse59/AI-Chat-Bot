@@ -258,7 +258,7 @@ asyncio.create_task(_track_user_activity(...))
 
 ### 2. ChatBot Service Integration
 
-**Location**: `openai_web_service/middleware/analytics_middleware.py`
+**Location**: `chat-service/middleware/analytics_middleware.py`
 
 **Features**:
 - Automatic API request tracking
@@ -453,3 +453,4 @@ For issues or questions about analytics:
 2. Review logs: `docker-compose logs analytics-service`
 3. Consult main [README.md](README.md)
 4. Open GitHub issue with [Analytics] tag
+

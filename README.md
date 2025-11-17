@@ -205,7 +205,7 @@ ConvoAI/
 │   ├── tests/
 │   └── Dockerfile
 │
-├── openai_web_service/            # ChatBot service
+├── chat-service/                  # ChatBot service
 │   ├── api/
 │   │   └── routes.py             # API endpoints
 │   ├── engine/
@@ -549,7 +549,7 @@ uvicorn auth_server.main:app --reload --port 8001
 
 **Chat Service:**
 ```bash
-cd openai_web_service
+cd chat-service
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 uvicorn main:app --reload --port 8000
 ```
@@ -579,7 +579,7 @@ The project uses a 3-tier environment configuration:
    - No DATABASE_URL needed in .env files
    - Services automatically create databases with absolute paths
    - auth-service: `auth-service/auth.db`
-   - openai_web_service: `openai_web_service/data/chatbot.db`
+   - chat-service: `chat-service/data/chatbot.db`
    - analytics-service: `analytics-service/data/analytics.db`
 
 ### Admin User Management
@@ -852,12 +852,12 @@ curl http://localhost:3000
    ```bash
    # Windows
    dir auth-service\venv
-   dir openai_web_service\venv
+   dir chat-service\venv
    dir analytics-service\venv
    
    # Linux/Mac
    ls -la auth-service/venv
-   ls -la openai_web_service/venv
+   ls -la chat-service/venv
    ls -la analytics-service/venv
    ```
 
@@ -890,12 +890,12 @@ curl http://localhost:3000
    ```bash
    # Windows
    del auth-service\auth.db
-   del openai_web_service\data\chatbot.db
+   del chat-service\data\chatbot.db
    del analytics-service\data\analytics.db
    
    # Linux/Mac
    rm auth-service/auth.db
-   rm openai_web_service/data/chatbot.db
+   rm chat-service/data/chatbot.db
    rm analytics-service/data/analytics.db
    ```
 4. Restart services to recreate databases
@@ -1090,7 +1090,7 @@ curl http://localhost:8000/conversations/ \
 - [Utility Scripts](./utils/README.md) - Database utilities and standalone test scripts
 - [Frontend README](./chat-frontend/README.md)
 - [Auth Server README](./auth-service/README.md)
-- [ChatBot Service README](./openai_web_service/README.md)
+- [ChatBot Service README](./chat-service/README.md)
 - [Analytics Service README](./analytics-service/README.md)
 - [**Analytics Integration Guide**](./docs/ANALYTICS_GUIDE.md) ⭐ - Complete analytics documentation
 - [CHANGELOG](./docs/CHANGELOG.md) - Complete change history

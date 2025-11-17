@@ -7,7 +7,7 @@ Complete end-to-end implementation of response time tracking, token aggregation,
 
 ### 1. Database Schema Updates
 
-#### ChatMessage Model (`openai_web_service/engine/models.py`)
+#### ChatMessage Model (`chat-service/engine/models.py`)
 Added response time tracking to chat messages:
 ```python
 response_time = Column(Integer, nullable=True)  # Response time in milliseconds
@@ -18,7 +18,7 @@ response_time = Column(Integer, nullable=True)  # Response time in milliseconds
 
 ### 2. Response Time Calculation
 
-#### OpenAI Service (`openai_web_service/services/openai_service.py`)
+#### OpenAI Service (`chat-service/services/openai_service.py`)
 Implemented millisecond-precision response time tracking:
 ```python
 # Record start time before processing
@@ -49,7 +49,7 @@ return {
 
 ### 3. Schema Updates
 
-#### Message Schemas (`openai_web_service/engine/schemas.py`)
+#### Message Schemas (`chat-service/engine/schemas.py`)
 Added response_time to all message schemas:
 - `ChatMessageBase`: Added `response_time: Optional[int] = None`
 - `ChatMessageCreateSimple`: Includes response_time field
@@ -57,7 +57,7 @@ Added response_time to all message schemas:
 
 ### 4. WebSocket Handler Updates
 
-#### Chat Handler (`openai_web_service/websocket/chat_handler.py`)
+#### Chat Handler (`chat-service/websocket/chat_handler.py`)
 Properly passes response time to analytics:
 ```python
 # Convert milliseconds to seconds for analytics
@@ -389,3 +389,4 @@ For issues or questions about this implementation:
 2. Verify database state: Check tables directly
 3. Review this document for architecture details
 4. Test with simple scenarios first
+

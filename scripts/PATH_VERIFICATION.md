@@ -60,7 +60,7 @@ This navigates from `scripts/linux-mac/` to `scripts/` then up to project root.
 
 All scripts now correctly:
 1. Navigate to the project root
-2. Access service directories (auth-service, openai_web_service, analytics-service, etc.)
+2. Access service directories (auth-service, chat-service, analytics-service, etc.)
 3. Reference virtual environment paths
 4. Load .env files from correct locations
 
@@ -78,3 +78,4 @@ chmod +x scripts/linux-mac/*.sh
 ./scripts/linux-mac/setup-venv.sh
 ./scripts/linux-mac/start-all-services.sh
 ```
+

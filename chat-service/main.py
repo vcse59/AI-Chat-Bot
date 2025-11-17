@@ -27,7 +27,7 @@ if __name__ == '__main__':
         print("=" * 50)
     
     uvicorn.run(
-        "openai_web_service.app:app",
+        "chat_service.app:app",
         host=host,
         port=port,
         reload=reload,

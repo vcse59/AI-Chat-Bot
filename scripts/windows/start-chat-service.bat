@@ -4,7 +4,12 @@ echo Starting Chat Service on Port 8000
 echo ========================================
 echo.
 
-cd /d "%~dp0..\..\openai_web_service"
+@echo off
+REM Navigate to chat service directory
+REM Use %~dp0 to get script's directory, then navigate relative to project root
+
+REM Get the project root (2 levels up from scripts/windows/)
+cd /d "%~dp0..\..\chat-service"
 
 REM Check if venv exists
 if not exist "venv\Scripts\activate.bat" (
@@ -38,7 +43,7 @@ echo.
 if not defined OPENAI_API_KEY (
     echo ⚠️  WARNING: OPENAI_API_KEY not set!
     echo Chat functionality may not work without it.
-    echo Set it in openai_web_service/.env file.
+    echo Set it in chat-service/.env file.
     echo.
 ) else (
     echo ✅ OPENAI_API_KEY is configured

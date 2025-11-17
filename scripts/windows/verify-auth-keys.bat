@@ -15,7 +15,7 @@ echo.
 
 echo Chat Service:
 echo   - Looking for AUTH_SECRET_KEY in code...
-findstr /C:"AUTH_SECRET_KEY" openai_web_service\security\oauth.py
+findstr /C:"AUTH_SECRET_KEY" chat-service\security\oauth.py
 echo.
 
 echo Analytics Service:
@@ -28,3 +28,4 @@ echo If all services show "AUTH_SECRET_KEY", configuration is correct!
 echo If any service shows "SECRET_KEY", that service needs to be updated.
 echo ============================================
 pause
+

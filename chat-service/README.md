@@ -72,7 +72,7 @@ This service integrates with the Authorization Server for secure authentication:
 Run with full platform from project root:
 
 ```bash
-docker-compose up openai_web_service
+docker-compose up chat-service
 ```
 
 See main [README.md](../README.md) for complete Docker setup.
@@ -88,7 +88,7 @@ See main [README.md](../README.md) for complete Docker setup.
 
 1. **Install dependencies:**
    ```bash
-   cd openai_web_service
+   cd chat-service
    pip install -e .
    
    # For development
@@ -106,7 +106,7 @@ See main [README.md](../README.md) for complete Docker setup.
    
    Service `.env`:
    ```env
-   # openai_web_service/.env
+   # chat-service/.env
    PORT=8000
    HOST=0.0.0.0
    AUTH_SERVICE_URL=http://localhost:8001
@@ -144,18 +144,18 @@ scripts/linux-mac/start-chat-service.sh
 
 ### Database Configuration
 
-Database is automatically created at `openai_web_service/data/chatbot.db` using absolute paths. No manual configuration needed.
+Database is automatically created at `chat-service/data/chatbot.db` using absolute paths. No manual configuration needed.
 
 To reset database:
 
 **Windows:**
 ```cmd
-del openai_web_service\data\chatbot.db
+del chat-service\data\chatbot.db
 ```
 
 **Linux/Mac:**
 ```bash
-rm openai_web_service/data/chatbot.db
+rm chat-service/data/chatbot.db
 ```
 
 Then restart the service to recreate.
@@ -189,7 +189,7 @@ Build and run the FastAPI application as a standalone Docker container.
 
 ```bash
 # Navigate to the application directory
-cd openai_web_service
+cd chat-service
 
 # Build development image
 docker build -t openai-web-service:dev .
@@ -251,7 +251,7 @@ For production environments, use the optimized setup:
 
 ```bash
 # 1. Build production image
-docker build -f openai_web_service/Dockerfile.production -t openai-web-service:latest .
+docker build -f chat-service/Dockerfile.production -t openai-web-service:latest .
 
 # 2. Run with production configuration
 docker-compose --profile production up -d --build
@@ -525,7 +525,7 @@ ws.onopen = () => {
 Open-ChatBot/
 ├── docker-compose.yml           # 🐳 Docker Compose configuration
 ├── .venv/                      # Python virtual environment (local dev)
-└── openai_web_service/         # Main application directory
+└── chat-service/         # Main application directory
     ├── 📱 Application Files
     ├── app.py                  # Main FastAPI application
     ├── main.py                 # Entry point
@@ -671,3 +671,4 @@ For production deployment, additional considerations:
 ## License
 
 MIT License
+

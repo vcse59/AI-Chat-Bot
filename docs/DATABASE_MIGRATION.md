@@ -22,7 +22,7 @@ The application has been migrated from **3 separate databases** to **1 unified d
 
 ### 2. Service Database Configurations
 - ✅ `auth-service` updated to read from environment `DATABASE_URL`
-- ✅ `openai_web_service` updated to read from environment `DATABASE_URL`
+- ✅ `chat-service` updated to read from environment `DATABASE_URL`
 - ✅ `analytics-service` updated to read from environment `DATABASE_URL`
 
 ### 3. Unified Schema
@@ -180,3 +180,4 @@ For issues or questions about the migration, please:
 1. Check container logs: `docker compose logs`
 2. Verify database connectivity: `docker exec -it auth-server ls -la /app/data/`
 3. Test database access: `docker exec -it auth-server sqlite3 /app/data/chatbot.db ".tables"`
+

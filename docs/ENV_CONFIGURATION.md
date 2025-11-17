@@ -11,7 +11,7 @@ Each service has its own `.env` file for configuration. These files have been cr
 - `DATABASE_URL` - Auth database path
 - `ADMIN_USERNAME` / `ADMIN_PASSWORD` - Default admin credentials
 
-### 2. Chat Service (`openai_web_service/.env`)
+### 2. Chat Service (`chat-service/.env`)
 **Configuration:**
 - `OPENAI_API_KEY` - Your OpenAI API key ⚠️ **REQUIRED for chat**
 - `PORT` - Service port (default: 8000)
@@ -35,16 +35,16 @@ Each service has its own `.env` file for configuration. These files have been cr
 ## Important Notes
 
 ### OpenAI API Key
-The OpenAI API key is already configured in `openai_web_service/.env`. If you need to update it:
+The OpenAI API key is already configured in `chat-service/.env`. If you need to update it:
 1. Get your API key from https://platform.openai.com/api-keys
-2. Edit `openai_web_service/.env`
+2. Edit `chat-service/.env`
 3. Replace the `OPENAI_API_KEY` value
 4. Restart the chat service
 
 ### Shared Secret Key
 The `AUTH_SECRET_KEY` must be the same across:
 - `auth-service/.env`
-- `openai_web_service/.env`
+- `chat-service/.env`
 - `analytics-service/.env`
 
 This ensures JWT tokens work across all services.
@@ -53,7 +53,7 @@ This ensures JWT tokens work across all services.
 
 The startup scripts automatically load environment variables from each service's `.env` file:
 - `scripts/start-auth-service.bat` → Loads `auth-service/.env`
-- `scripts/start-chat-service.bat` → Loads `openai_web_service/.env`
+- `scripts/start-chat-service.bat` → Loads `chat-service/.env`
 - `scripts/start-analytics-service.bat` → Loads `analytics-service/.env`
 - Frontend automatically loads `.env` via React
 
@@ -73,7 +73,7 @@ To customize any setting:
 
 Example - Change Chat Service port:
 ```bash
-# Edit openai_web_service/.env
+# Edit chat-service/.env
 PORT=9000
 
 # Restart service
@@ -87,7 +87,7 @@ scripts\start-chat-service.bat
 - Ensure all services use `localhost` (not `127.0.0.1` mixed with `localhost`)
 
 **Chat not working:**
-- Verify `OPENAI_API_KEY` is set in `openai_web_service/.env`
+- Verify `OPENAI_API_KEY` is set in `chat-service/.env`
 - Check the OpenAI API key is valid
 
 **Auth errors across services:**
@@ -96,3 +96,4 @@ scripts\start-chat-service.bat
 **Frontend can't connect:**
 - Check URLs in `chat-frontend/.env` match your service ports
 - Restart frontend after changing `.env`
+

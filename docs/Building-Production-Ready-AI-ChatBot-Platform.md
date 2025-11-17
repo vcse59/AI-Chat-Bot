@@ -144,7 +144,7 @@ async def startup_event():
 The chat service uses WebSocket for real-time bidirectional communication:
 
 ```python
-# openai_web_service/websocket/chat_handler.py
+# chat-service/websocket/chat_handler.py
 @router.websocket("/ws/{conversation_id}")
 async def websocket_endpoint(
     websocket: WebSocket,
@@ -220,7 +220,7 @@ async def websocket_endpoint(
 The service integrates with OpenAI's GPT-4 API:
 
 ```python
-# openai_web_service/services/openai_service.py
+# chat-service/services/openai_service.py
 async def get_openai_response(db: Session, conversation_id: str, user_message: str) -> str:
     """Get response from OpenAI API with conversation context"""
     
@@ -288,7 +288,7 @@ class AnalyticsService:
 Automatic API usage tracking without cluttering application code:
 
 ```python
-# openai_web_service/middleware/analytics_middleware.py
+# chat-service/middleware/analytics_middleware.py
 @app.middleware("http")
 async def analytics_tracking_middleware(request: Request, call_next):
     """Track all API requests for analytics"""
@@ -436,8 +436,8 @@ services:
     networks:
       - chatbot-network
 
-  openai_web_service:
-    build: ./openai_web_service
+  chat-service:
+    build: ./chat-service
     ports:
       - "8000:8000"
     environment:
@@ -474,7 +474,7 @@ services:
       - REACT_APP_WS_URL=ws://localhost:8000
     depends_on:
       - auth-service
-      - openai_web_service
+      - chat-service
       - analytics-service
     networks:
       - chatbot-network
@@ -505,7 +505,7 @@ cd /d %~dp0..\..
 start "Auth Service" cmd /k "cd auth-service && venv\Scripts\activate && uvicorn auth_server.main:app --reload --port 8001"
 
 :: Start chat service
-start "Chat Service" cmd /k "cd openai_web_service && venv\Scripts\activate && uvicorn main:app --reload --port 8000"
+start "Chat Service" cmd /k "cd chat-service && venv\Scripts\activate && uvicorn main:app --reload --port 8000"
 
 :: Start analytics service
 start "Analytics Service" cmd /k "cd analytics-service && venv\Scripts\activate && uvicorn main:app --reload --port 8002"
@@ -534,7 +534,7 @@ fi
 $TERMINAL -- bash -c "cd $PROJECT_ROOT/auth-service && source venv/bin/activate && uvicorn auth_server.main:app --reload --port 8001; exec bash"
 
 # Start chat service
-$TERMINAL -- bash -c "cd $PROJECT_ROOT/openai_web_service && source venv/bin/activate && uvicorn main:app --reload --port 8000; exec bash"
+$TERMINAL -- bash -c "cd $PROJECT_ROOT/chat-service && source venv/bin/activate && uvicorn main:app --reload --port 8000; exec bash"
 
 # Start analytics service
 $TERMINAL -- bash -c "cd $PROJECT_ROOT/analytics-service && source venv/bin/activate && uvicorn main:app --reload --port 8002; exec bash"
@@ -761,7 +761,7 @@ ADMIN_USERNAME=admin
 ADMIN_PASSWORD=admin123
 ADMIN_EMAIL=admin@example.com
 
-# openai_web_service/.env
+# chat-service/.env
 PORT=8000
 HOST=0.0.0.0
 AUTH_SERVICE_URL=http://localhost:8001
@@ -790,7 +790,7 @@ REACT_APP_WS_URL=ws://localhost:8000
 **Absolute Paths**: Databases use absolute paths to prevent multiple database files:
 
 ```python
-# openai_web_service/engine/database.py
+# chat-service/engine/database.py
 from pathlib import Path
 
 # Get service directory
@@ -967,7 +967,7 @@ docker-compose up -d
 docker-compose logs -f
 
 # Scale services
-docker-compose up -d --scale openai_web_service=3
+docker-compose up -d --scale chat-service=3
 ```
 
 ### Environment-Specific Configurations
@@ -975,7 +975,7 @@ docker-compose up -d --scale openai_web_service=3
 ```yaml
 # docker-compose.prod.yml
 services:
-  openai_web_service:
+  chat-service:
     environment:
       - ENVIRONMENT=production
       - DEBUG=false
@@ -1168,3 +1168,4 @@ Drop your questions in the comments below! I'm happy to discuss:
 - Testing approaches
 
 Let's build amazing things together! 🚀
+

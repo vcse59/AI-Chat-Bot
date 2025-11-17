@@ -150,7 +150,7 @@ Once running:
 ConvoAI/
 ├── auth-service/          # Auth service with venv
 │   └── venv/
-├── openai_web_service/    # Chat & Analytics service with venv
+├── chat-service/    # Chat & Analytics service with venv
 │   └── venv/
 ├── chat-frontend/         # React frontend
 │   └── node_modules/
@@ -166,3 +166,4 @@ ConvoAI/
     ├── stop-all-services.bat
     └── run-tests.bat
 ```
+

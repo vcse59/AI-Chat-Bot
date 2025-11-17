@@ -17,7 +17,7 @@ echo ✅ Auth Service venv created
 echo.
 
 echo Creating virtual environment for Chat Service...
-cd /d "%~dp0..\..\openai_web_service"
+cd /d "%~dp0..\..\chat-service"
 python -m venv venv
 call venv\Scripts\activate
 python -m pip install --upgrade pip
@@ -52,3 +52,4 @@ echo All virtual environments created!
 echo ========================================
 echo.
 pause
+

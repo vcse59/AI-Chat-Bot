@@ -10,7 +10,7 @@ Test results showed 2 failures:
 ## Root Cause
 The admin conversation endpoints were returning 404 because the frontend was calling the wrong paths.
 
-**Backend Configuration (in `openai_web_service/app.py`):**
+**Backend Configuration (in `chat-service/app.py`):**
 ```python
 # Line 47: API router is mounted with /api/v1 prefix
 app.include_router(api_router, prefix="/api/v1")
@@ -72,7 +72,7 @@ python verify_admin_endpoints.py
 ## Technical Details
 
 ### Backend Routes (Correct)
-From `openai_web_service/api/routes.py`:
+From `chat-service/api/routes.py`:
 ```python
 @router.get("/admin/conversations/", response_model=List[schemas.ConversationResponse], tags=["admin"])
 async def get_all_conversations_admin(
@@ -155,3 +155,4 @@ Total Tests: 14
 ✅ Passed: 14 (100%)
 ❌ Failed: 0 (0%)
 ```
+

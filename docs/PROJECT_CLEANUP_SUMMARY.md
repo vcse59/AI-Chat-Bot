@@ -27,14 +27,14 @@ This document summarizes all major changes, improvements, and documentation upda
 - **Automatic Database Paths**:
   - Services use absolute paths relative to module location
   - `auth-service/auth.db`
-  - `openai_web_service/data/chatbot.db`
+  - `chat-service/data/chatbot.db`
   - `analytics-service/data/analytics.db`
 
 **Files Modified:**
 - `auth-service/auth_server/security/auth.py` - Changed to read AUTH_SECRET_KEY
 - All service `main.py`/`app.py` - Added `load_dotenv()` at top
 - All service `.env` files - Removed DATABASE_URL entries
-- `openai_web_service/engine/database.py` - Changed to absolute paths
+- `chat-service/engine/database.py` - Changed to absolute paths
 - `analytics-service/analytics/database/db.py` - Changed to absolute paths
 
 ### 2. Cross-Platform Script Organization
@@ -125,7 +125,7 @@ scripts/
 
 **Files Modified:**
 - `auth-service/auth_server/security/auth.py`
-- `openai_web_service/security/oauth.py`
+- `chat-service/security/oauth.py`
 - `analytics-service/analytics/security/auth.py`
 - All service `.env` files (AUTH_SERVICE_URL, CHAT_SERVICE_URL)
 
@@ -139,7 +139,7 @@ scripts/
 
 **Changes:**
 - `auth-service`: `Path(__file__).parent.parent.parent / "auth.db"`
-- `openai_web_service`: `Path(__file__).parent.parent / "data" / "chatbot.db"`
+- `chat-service`: `Path(__file__).parent.parent / "data" / "chatbot.db"`
 - `analytics-service`: `Path(__file__).parent.parent.parent / "data" / "analytics.db"`
 
 **Benefits:**
@@ -165,7 +165,7 @@ scripts/
    - Added Create Admin User section
    - Added Testing section with script usage
 
-3. **openai_web_service/README.md**:
+3. **chat-service/README.md**:
    - Updated Overview with analytics integration
    - Reorganized Quick Start for Docker and Local
    - Added platform script usage
@@ -211,7 +211,7 @@ scripts/
 | Service | Database Path | Auto-Created |
 |---------|--------------|--------------|
 | Auth | `auth-service/auth.db` | ✅ Yes |
-| Chat | `openai_web_service/data/chatbot.db` | ✅ Yes |
+| Chat | `chat-service/data/chatbot.db` | ✅ Yes |
 | Analytics | `analytics-service/data/analytics.db` | ✅ Yes |
 
 ### Environment Variables
@@ -450,7 +450,7 @@ scripts/linux-mac/start-all-services.sh
 - [Scripts Documentation](../scripts/README.md) - Script usage guide
 - [Path Verification](../scripts/PATH_VERIFICATION.md) - Path corrections
 - [Auth Service README](../auth-service/README.md) - Authentication service
-- [Chat Service README](../openai_web_service/README.md) - Chat service
+- [Chat Service README](../chat-service/README.md) - Chat service
 - [Analytics Service README](../analytics-service/README.md) - Analytics service
 - [Frontend README](../chat-frontend/README.md) - React frontend
 - [Tests README](../tests/README.md) - Testing documentation
@@ -497,3 +497,4 @@ The project has been successfully cleaned up and documented. All services now su
 **Last Updated:** December 2024  
 **Maintained By:** Project Team  
 **Version:** 1.0.0
+

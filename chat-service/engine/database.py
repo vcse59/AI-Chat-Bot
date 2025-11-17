@@ -12,7 +12,7 @@ if DATABASE_URL:
 else:
     # Default to local database for development
     # Use absolute path relative to the service directory
-    service_dir = Path(__file__).parent.parent  # openai_web_service directory
+    service_dir = Path(__file__).parent.parent  # chat-service directory
     data_dir = service_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     db_path = data_dir / "chatbot.db"

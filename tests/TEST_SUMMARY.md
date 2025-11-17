@@ -224,7 +224,7 @@ Name                          Stmts   Miss  Cover
 auth_server/main.py             45      2    96%
 auth_server/routers/auth.py     38      1    97%
 auth_server/routers/users.py    72      3    96%
-openai_web_service/app.py       89      5    94%
+chat-service/app.py       89      5    94%
 -------------------------------------------------
 TOTAL                          620     28    95%
 ```
@@ -329,3 +329,4 @@ CI Pipeline:
 **Last Updated**: November 15, 2025  
 **Test Suite Version**: 1.0.0  
 **Maintained by**: Development Team
+
