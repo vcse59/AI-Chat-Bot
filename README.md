@@ -117,7 +117,12 @@ ConvoAI/
 ├── .env.example                  # Example environment configuration
 ├── docker-compose.yml            # Docker orchestration
 ├── README.md                     # This file
-├── QUICK_START_LOCAL.md          # Detailed local setup guide
+│
+├── docs/                         # Documentation
+│   ├── QUICK_START_LOCAL.md      # Detailed local setup guide
+│   ├── ANALYTICS_GUIDE.md        # Analytics integration guide
+│   ├── CHANGELOG.md              # Version history
+│   └── ... (all other documentation)
 │
 ├── scripts/                      # Platform-specific service management scripts
 │   ├── windows/                  # Windows scripts (.bat)
@@ -243,12 +248,7 @@ ConvoAI/
 │   ├── run_tests.bat             # Windows test runner
 │   ├── run_tests.sh              # Linux/Mac test runner
 │   └── README.md
-│
-├── docker-compose.yml             # Docker orchestration
-├── .env                           # Shared configuration (AUTH_SECRET_KEY, OPENAI_API_KEY)
-├── .env.example                   # Example environment configuration
-├── CHANGELOG.md                   # Version history
-└── README.md                      # This file
+└── VERSION                        # Version number
 ```
 
 ## 🧪 Testing
@@ -378,7 +378,7 @@ chmod +x scripts/linux-mac/*.sh
 # 5. Access: http://localhost:3000
 ```
 
-**📚 For detailed local setup instructions, see [QUICK_START_LOCAL.md](QUICK_START_LOCAL.md)**
+**📚 For detailed local setup instructions, see [QUICK_START_LOCAL.md](docs/QUICK_START_LOCAL.md)**
 
 ## 📖 Usage Guide
 
@@ -451,7 +451,7 @@ chmod +x scripts/linux-mac/*.sh
 
 ### Local Development Setup
 
-Detailed guide available in [QUICK_START_LOCAL.md](QUICK_START_LOCAL.md)
+Detailed guide available in [QUICK_START_LOCAL.md](docs/QUICK_START_LOCAL.md)
 
 **Prerequisites:**
 - Python 3.12+
@@ -1076,15 +1076,16 @@ curl http://localhost:8000/conversations/ \
 
 ## 📚 Additional Documentation
 
-- [Quick Start Local Development](./QUICK_START_LOCAL.md) ⭐ **NEW** - Detailed local setup guide
+- [Quick Start Local Development](./docs/QUICK_START_LOCAL.md) ⭐ **NEW** - Detailed local setup guide
 - [Scripts Documentation](./scripts/README.md) - Platform-specific management scripts
 - [Frontend README](./chat-frontend/README.md)
 - [Auth Server README](./auth-service/README.md)
 - [ChatBot Service README](./openai_web_service/README.md)
 - [Analytics Service README](./analytics-service/README.md)
-- [**Analytics Integration Guide**](./ANALYTICS_GUIDE.md) ⭐ - Complete analytics documentation
-- [CHANGELOG](./CHANGELOG.md) - Complete change history
+- [**Analytics Integration Guide**](./docs/ANALYTICS_GUIDE.md) ⭐ - Complete analytics documentation
+- [CHANGELOG](./docs/CHANGELOG.md) - Complete change history
 - [Testing Documentation](./tests/README.md)
+- [All Documentation](./docs/) - Complete documentation index
 
 ## 🐛 Known Issues & Fixes
 
@@ -1101,7 +1102,7 @@ All major issues have been resolved in the latest version:
 - ✅ **Database path issues** - Implemented absolute paths for all databases
 - ✅ **Cross-platform script support** - Added Windows and Linux/Mac script organization
 
-See [CHANGELOG.md](./CHANGELOG.md) for detailed fix information.
+See [CHANGELOG.md](./docs/CHANGELOG.md) for detailed fix information.
 
 ## 🤝 Contributing
 

@@ -445,15 +445,15 @@ scripts/linux-mac/start-all-services.sh
 
 ## 📚 Reference Documentation
 
-- [Main README](./README.md) - Project overview and features
+- [Main README](../README.md) - Project overview and features
 - [Quick Start Local Development](./QUICK_START_LOCAL.md) - Detailed local setup
-- [Scripts Documentation](./scripts/README.md) - Script usage guide
-- [Path Verification](./scripts/PATH_VERIFICATION.md) - Path corrections
-- [Auth Service README](./auth-service/README.md) - Authentication service
-- [Chat Service README](./openai_web_service/README.md) - Chat service
-- [Analytics Service README](./analytics-service/README.md) - Analytics service
-- [Frontend README](./chat-frontend/README.md) - React frontend
-- [Tests README](./tests/README.md) - Testing documentation
+- [Scripts Documentation](../scripts/README.md) - Script usage guide
+- [Path Verification](../scripts/PATH_VERIFICATION.md) - Path corrections
+- [Auth Service README](../auth-service/README.md) - Authentication service
+- [Chat Service README](../openai_web_service/README.md) - Chat service
+- [Analytics Service README](../analytics-service/README.md) - Analytics service
+- [Frontend README](../chat-frontend/README.md) - React frontend
+- [Tests README](../tests/README.md) - Testing documentation
 - [Analytics Guide](./ANALYTICS_GUIDE.md) - Analytics integration
 - [Changelog](./CHANGELOG.md) - Version history
 
