@@ -418,6 +418,164 @@ auth-service/
         test_roles.py      # Role endpoint tests
 ```
 
+## Running on Host Machine
+
+### Prerequisites
+- Python 3.12+
+- Terminal/Command Prompt
+
+### Setup Steps
+
+1. **Navigate to auth-service directory**
+   ```bash
+   cd auth-service
+   ```
+
+2. **Create virtual environment**
+   ```bash
+   python -m venv venv
+   ```
+
+3. **Activate virtual environment**
+   ```bash
+   # Windows
+   venv\Scripts\activate
+   
+   # Linux/Mac
+   source venv/bin/activate
+   ```
+
+4. **Install dependencies**
+   ```bash
+   pip install -e .
+   ```
+
+5. **Configure environment** (create `.env` in auth-service directory)
+   ```env
+   # Server Configuration
+   HOST=0.0.0.0
+   PORT=8001
+   
+   # CORS Origins (adjust for your frontend URL)
+   CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+   
+   # Analytics Service URL (optional)
+   ANALYTICS_SERVICE_URL=http://localhost:8002
+   ```
+
+6. **Load shared secrets from root .env**
+   ```bash
+   # Ensure AUTH_SECRET_KEY is accessible
+   # Copy from root .env or set in auth-service/.env:
+   AUTH_SECRET_KEY=your-secret-key-from-root-env
+   ```
+
+7. **Start the service**
+   ```bash
+   uvicorn auth_server.main:app --host 0.0.0.0 --port 8001 --reload
+   ```
+
+8. **Verify service is running**
+   - API Docs: http://localhost:8001/docs
+   - Health Check: http://localhost:8001/health
+
+9. **Create admin user** (first time setup)
+   ```bash
+   # Run this Python script in the auth-service directory
+   python -c "
+import sys
+sys.path.insert(0, '.')
+from auth_server.database.db import init_db
+from auth_server.models.user import User
+from auth_server.models.role import Role
+from auth_server.models.user_role import UserRole
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
+init_db()
+from auth_server.database.db import SessionLocal
+
+db = SessionLocal()
+pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+
+# Create admin role
+admin_role = db.query(Role).filter(Role.name == 'admin').first()
+if not admin_role:
+    admin_role = Role(name='admin', description='Administrator')
+    db.add(admin_role)
+    db.commit()
+
+# Create admin user
+admin = db.query(User).filter(User.username == 'admin').first()
+if not admin:
+    admin = User(
+        username='admin',
+        email='admin@example.com',
+        hashed_password=pwd_context.hash('admin123'),
+        full_name='Admin User',
+        is_active=True
+    )
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    
+    user_role = UserRole(user_id=admin.id, role_id=admin_role.id)
+    db.add(user_role)
+    db.commit()
+    print('Admin user created: admin / admin123')
+else:
+    print('Admin user already exists')
+
+db.close()
+"
+   ```
+
+### Database Location
+The SQLite database will be automatically created at:
+- `auth-service/auth.db`
+
+No manual database setup required - tables are created on first run.
+
+### Common Issues
+
+**Import Errors:**
+```bash
+# Install in editable mode to fix import paths
+pip install -e .
+```
+
+**Database Permission Issues:**
+```bash
+# Ensure write permissions for auth-service directory
+chmod 755 .  # Linux/Mac
+```
+
+**Port Already in Use:**
+```bash
+# Change port in .env or command line
+uvicorn auth_server.main:app --host 0.0.0.0 --port 8011
+```
+
+### Development Mode
+
+For development with auto-reload:
+```bash
+uvicorn auth_server.main:app --host 0.0.0.0 --port 8001 --reload
+```
+
+### Production Mode
+
+For production deployment:
+```bash
+# Install production server
+pip install gunicorn
+
+# Run with multiple workers
+gunicorn auth_server.main:app --workers 4 \
+  --worker-class uvicorn.workers.UvicornWorker \
+  --bind 0.0.0.0:8001
+```
+
 ## Support & Contact
 
 For support requests, bug reports, or feature suggestions, please contact:

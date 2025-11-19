@@ -24,10 +24,12 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 class CurrentUser:
     """Current authenticated user model"""
-    def __init__(self, username: str, user_id: Optional[str] = None, roles: List[str] = None):
+    def __init__(self, username: str, user_id: Optional[str] = None, roles: Optional[List[str]] = None, token: Optional[str] = None):
         self.username = username
         self.user_id = user_id
         self.roles = roles or []
+        self.token = token
+        self.auth_service_url = AUTH_SERVICE_URL
     
     def has_role(self, role: str) -> bool:
         """Check if user has a specific role"""
@@ -90,7 +92,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> Optional[Curr
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        return CurrentUser(username=username, user_id=user_id, roles=roles)
+        return CurrentUser(username=username, user_id=user_id, roles=roles, token=token)
         
     except JWTError:
         raise HTTPException(

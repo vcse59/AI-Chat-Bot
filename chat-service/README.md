@@ -1,15 +1,16 @@
-# OpenAI ChatBot Service
+# OpenAI ChatBot Service with MCP Integration
 
-A comprehensive FastAPI application that provides OAuth 2.0 authenticated AI-powered conversations with real-time WebSocket support and OpenAI integration.
+A comprehensive FastAPI application that provides OAuth 2.0 authenticated AI-powered conversations with real-time WebSocket support, OpenAI function calling, and Model Context Protocol (MCP) integration.
 
 ## 🌟 Overview
 
 The ChatBot Service is the main application component of the ConvoAI platform, providing:
-- **AI-Powered Conversations**: Integration with OpenAI's GPT models
+- **AI-Powered Conversations**: Integration with OpenAI's GPT models with function calling
+- **MCP Integration**: Model Context Protocol support for extensible AI tools
 - **Real-time Communication**: WebSocket support for instant messaging
 - **OAuth 2.0 Security**: Token-based authentication with role-based access control
 - **Conversation Management**: Persistent storage of chat history
-- **User-Scoped Access**: Users can only access their own conversations
+- **User-Scoped Access**: Users can only access their own conversations and MCP servers
 - **Hash-Based IDs**: Secure, obfuscated identifiers for users and conversations
 - **Analytics Integration**: Middleware for tracking conversation metrics
 
@@ -43,14 +44,24 @@ This service integrates with the Authorization Server for secure authentication:
 - **User CRUD Operations** - Create, read, update, delete users (Admin only)
 - **Conversation Management** - Start, end, reconnect to conversations
 - **Message History** - Complete conversation persistence
+- **MCP Server Management** - Register, configure, and manage AI tool servers
 - **Advanced Filtering** - Search, pagination, and filtering options
 
 ### 💬 Real-time Chat
 - **WebSocket Support** - Real-time bidirectional communication
-- **OpenAI Integration** - AI-powered conversations using GPT models
+- **OpenAI Function Calling** - AI-powered conversations with tool execution
+- **MCP Tool Integration** - Automatic tool discovery and execution
 - **Context Preservation** - Maintain conversation history in database
 - **Multi-user Support** - Handle multiple concurrent conversations
 - **Anonymous Chat** - Optional anonymous WebSocket connections
+
+### 🔌 MCP (Model Context Protocol) Features
+- **User-Scoped Servers** - Each user manages their own MCP servers
+- **Automatic Tool Discovery** - Dynamic discovery of tools from registered servers
+- **Token-Based Auth** - User OAuth tokens passed to MCP servers
+- **JSON-RPC 2.0** - Standard protocol for tool communication
+- **Function Calling Integration** - Seamless integration with OpenAI's function calling
+- **Multiple Server Support** - Connect to multiple MCP servers simultaneously
 
 ### 📊 Analytics Integration
 - **Middleware Tracking** - Automatic metrics collection
@@ -666,6 +677,125 @@ For production deployment, additional considerations:
 - Set up backup strategies for data volumes
 - Implement monitoring and alerting
 - Use container restart policies
+```
+
+## Running on Host Machine
+
+### Prerequisites
+- Python 3.12+
+- OpenAI API Key
+- Auth service running on port 8001
+
+### Setup Steps
+
+1. **Navigate to chat-service directory**
+   ```bash
+   cd chat-service
+   ```
+
+2. **Create virtual environment**
+   ```bash
+   python -m venv venv
+   ```
+
+3. **Activate virtual environment**
+   ```bash
+   # Windows
+   venv\Scripts\activate
+   
+   # Linux/Mac
+   source venv/bin/activate
+   ```
+
+4. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. **Configure environment** (create `.env` in chat-service directory)
+   ```env
+   # OpenAI Configuration
+   OPENAI_API_KEY=sk-your-openai-api-key-here
+   
+   # Server Configuration
+   HOST=0.0.0.0
+   PORT=8000
+   
+   # Auth Service URL (for local development)
+   AUTH_SERVICE_URL=http://localhost:8001
+   
+   # CORS Origins (adjust for your frontend URL)
+   CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+   ```
+
+6. **Load shared secrets from root .env**
+   ```bash
+   # Ensure AUTH_SECRET_KEY is accessible
+   # Copy from root .env or set in chat-service/.env:
+   AUTH_SECRET_KEY=your-secret-key-from-root-env
+   ```
+
+7. **Start the service**
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+8. **Verify service is running**
+   - API Docs: http://localhost:8000/docs
+   - Health Check: http://localhost:8000/health
+
+### Database Location
+The SQLite database will be automatically created at:
+- `chat-service/data/chatbot.db`
+
+No manual database setup required - tables are created on first run.
+
+### Common Issues
+
+**Import Errors:**
+```bash
+# Make sure you're in the chat-service directory
+# and virtual environment is activated
+pip install -r requirements.txt
+```
+
+**Auth Service Connection:**
+```bash
+# Ensure auth service is running first on port 8001
+# Check AUTH_SERVICE_URL in .env points to correct URL
+```
+
+**Database Permission Issues:**
+```bash
+# Ensure write permissions for data directory
+mkdir -p data
+chmod 755 data  # Linux/Mac
+```
+
+**OpenAI API Errors:**
+```bash
+# Verify OPENAI_API_KEY is set correctly in .env
+# Test key: curl https://api.openai.com/v1/models \
+#   -H "Authorization: Bearer $OPENAI_API_KEY"
+```
+
+### Development Mode
+
+For development with auto-reload:
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Production Mode
+
+For production deployment:
+```bash
+# Install production server
+pip install gunicorn
+
+# Run with multiple workers
+gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker \
+  --bind 0.0.0.0:8000
 ```
 
 ## License

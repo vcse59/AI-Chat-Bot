@@ -11,7 +11,7 @@ services:
       - PORT=8001
       - HOST=0.0.0.0
       - DATABASE_URL=sqlite:///./data/chatbot.db
-      - SECRET_KEY=${AUTH_SECRET_KEY:-your-secret-key-change-in-production}
+      - AUTH_SECRET_KEY=${AUTH_SECRET_KEY:-your-secret-key-change-in-production}
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
       # Admin user credentials (set in .env or use defaults)
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
@@ -103,6 +103,21 @@ services:
       - auth-server
       - openai-chatbot
       - analytics-service
+    restart: unless-stopped
+    networks:
+      - chatbot-network
+
+  # Timezone MCP Server
+  timezone-mcp-server:
+    build: ./timezone-mcp-server
+    container_name: timezone-mcp-server
+    ports:
+      - "8003:8003"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-server:8001
+      - AUTH_SECRET_KEY=${AUTH_SECRET_KEY:-your-secret-key-change-in-production}
+    depends_on:
+      - auth-server
     restart: unless-stopped
     networks:
       - chatbot-network

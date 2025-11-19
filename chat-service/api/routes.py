@@ -3,11 +3,13 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from engine.database import get_database
 from engine import schemas, crud
+from engine import mcp_server_crud
 from security import get_current_user, get_current_active_user, require_admin, CurrentUser
 from middleware.analytics_middleware import track_conversation, track_message, sync_user_profile, track_user_activity
 import asyncio
 import time
 import logging
+import httpx
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -445,3 +447,128 @@ async def delete_conversation_admin(
     ))
     
     return {"message": "Conversation deleted successfully by admin", "conversation_id": conversation_id}
+
+
+# ============================================================================
+# MCP Server Management Endpoints
+# ============================================================================
+
+@router.post("/mcp-servers/", response_model=schemas.MCPServerResponse, tags=["mcp-servers"])
+async def create_mcp_server(
+    mcp_server: schemas.MCPServerCreate,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_active_user)
+):
+    """Create a new MCP server configuration"""
+    # Get user from database
+    user = crud.get_user_by_username(db, current_user.username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Create MCP server for the authenticated user
+    created_server = mcp_server_crud.create_mcp_server(db, mcp_server, str(user.id))
+    return created_server
+
+@router.get("/mcp-servers/", response_model=List[schemas.MCPServerResponse], tags=["mcp-servers"])
+async def list_user_mcp_servers(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    active_only: bool = Query(False),
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_active_user)
+):
+    """List all MCP servers for the current user"""
+    # Get user from database
+    user = crud.get_user_by_username(db, current_user.username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Get user's MCP servers
+    servers = mcp_server_crud.get_user_mcp_servers(db, str(user.id), skip, limit, active_only)
+    return servers
+
+@router.get("/mcp-servers/{server_id}", response_model=schemas.MCPServerResponse, tags=["mcp-servers"])
+async def get_mcp_server(
+    server_id: str,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_active_user)
+):
+    """Get a specific MCP server by ID"""
+    server = mcp_server_crud.get_mcp_server(db, server_id)
+    if not server:
+        raise HTTPException(status_code=404, detail="MCP server not found")
+    
+    # Get user from database
+    user = crud.get_user_by_username(db, current_user.username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check ownership or admin access
+    if not current_user.is_admin() and str(server.user_id) != str(user.id):
+        raise HTTPException(status_code=403, detail="Access denied: Not your MCP server")
+    
+    return server
+
+@router.put("/mcp-servers/{server_id}", response_model=schemas.MCPServerResponse, tags=["mcp-servers"])
+async def update_mcp_server(
+    server_id: str,
+    mcp_server_update: schemas.MCPServerUpdate,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_active_user)
+):
+    """Update an MCP server configuration"""
+    server = mcp_server_crud.get_mcp_server(db, server_id)
+    if not server:
+        raise HTTPException(status_code=404, detail="MCP server not found")
+    
+    # Get user from database
+    user = crud.get_user_by_username(db, current_user.username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check ownership or admin access
+    if not current_user.is_admin() and str(server.user_id) != str(user.id):
+        raise HTTPException(status_code=403, detail="Access denied: Not your MCP server")
+    
+    # Update server
+    updated_server = mcp_server_crud.update_mcp_server(db, server_id, mcp_server_update)
+    return updated_server
+
+@router.delete("/mcp-servers/{server_id}", tags=["mcp-servers"])
+async def delete_mcp_server(
+    server_id: str,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_active_user)
+):
+    """Delete an MCP server"""
+    server = mcp_server_crud.get_mcp_server(db, server_id)
+    if not server:
+        raise HTTPException(status_code=404, detail="MCP server not found")
+    
+    # Get user from database
+    user = crud.get_user_by_username(db, current_user.username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check ownership or admin access
+    if not current_user.is_admin() and str(server.user_id) != str(user.id):
+        raise HTTPException(status_code=403, detail="Access denied: Not your MCP server")
+    
+    # Delete server
+    success = mcp_server_crud.delete_mcp_server(db, server_id)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete MCP server")
+    
+    return {"message": "MCP server deleted successfully", "server_id": server_id}
+
+@router.get("/admin/mcp-servers/", response_model=List[schemas.MCPServerResponse], tags=["mcp-servers", "admin"])
+async def list_all_mcp_servers(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    active_only: bool = Query(False),
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(require_admin)
+):
+    """List all MCP servers across all users (Admin only)"""
+    servers = mcp_server_crud.get_all_mcp_servers(db, skip, limit, active_only)
+    return servers

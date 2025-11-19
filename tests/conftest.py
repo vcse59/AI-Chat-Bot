@@ -69,22 +69,27 @@ def registered_user(test_user_data: Dict[str, str]) -> Dict[str, str]:
 
 
 @pytest.fixture(scope="function")
-def authenticated_user(registered_user: Dict[str, str]) -> Dict[str, str]:
-    """Create a registered user and return authentication token."""
+def authenticated_user() -> Dict[str, str]:
+    """Use existing admin user for authentication."""
+    admin_credentials = {
+        "username": "admin",
+        "password": "admin123"
+    }
+    
     # Login to get token
     response = requests.post(
         f"{AUTH_BASE_URL}/auth/token",
         data={
-            "username": registered_user["username"],
-            "password": registered_user["password"]
+            "username": admin_credentials["username"],
+            "password": admin_credentials["password"]
         },
         headers={"Content-Type": "application/x-www-form-urlencoded"}
     )
-    assert response.status_code == 200, f"Failed to login: {response.text}"
+    assert response.status_code == 200, f"Failed to login as admin: {response.text}"
     
     token_data = response.json()
     return {
-        **registered_user,
+        **admin_credentials,
         "access_token": token_data["access_token"],
         "token_type": token_data["token_type"]
     }

@@ -176,3 +176,30 @@ class PaginatedResponse(BaseModel):
     page: int
     size: int
     pages: int
+
+# MCP Server Schemas
+class MCPServerBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = None
+    server_url: str = Field(..., min_length=1, max_length=500)
+    is_active: bool = True
+    config: Optional[Dict[str, Any]] = None
+
+class MCPServerCreate(MCPServerBase):
+    pass
+
+class MCPServerUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    description: Optional[str] = None
+    server_url: Optional[str] = Field(None, min_length=1, max_length=500)
+    is_active: Optional[bool] = None
+    config: Optional[Dict[str, Any]] = None
+
+class MCPServerResponse(MCPServerBase):
+    id: str  # Hash-based ID
+    user_id: str  # Hash-based user ID
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True

@@ -197,7 +197,7 @@ async def websocket_chat_with_user(
         # Allow connection without token but log it
         logger.warning(f"WebSocket connection for user {user_id} without authentication token")
     
-    await websocket_handler.handle_connection(websocket, user_id)
+    await websocket_handler.handle_connection(websocket, user_id, token)
 
 @app.websocket("/ws/chat")
 async def websocket_chat_anonymous(websocket: WebSocket):

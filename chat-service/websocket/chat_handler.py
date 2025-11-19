@@ -5,6 +5,7 @@ import logging
 from sqlalchemy.orm import Session
 from engine.database import get_database
 from engine import schemas
+from engine import user_crud
 from services.openai_service import get_openai_service
 from utilities.logging_utils import log_websocket_event, log_security_event
 from utilities.response_utils import create_websocket_response, create_error_response
@@ -77,7 +78,9 @@ class WebSocketHandler:
         if not self.openai_api_key:
             logger.warning("OPENAI_API_KEY not found in environment variables")
 
-    async def handle_connection(self, websocket: WebSocket, user_id: Optional[str] = None):
+    async def handle_connection(self, websocket: WebSocket, user_id: Optional[str] = None, token: Optional[str] = None):
+        # Store token in websocket state for later use
+        websocket.state.user_token = token
         await manager.connect(websocket, user_id)
         
         # Get database session
@@ -249,11 +252,31 @@ class WebSocketHandler:
             # Parse request data
             request = schemas.SendMessageRequest(**data)
             
+            # Get actual user database ID from username for MCP tools
+            actual_user_id = user_id
+            logger.info(f"Resolving user_id: {user_id}")
+            if user_id:
+                # user_id here might be username, get the actual database ID
+                user = user_crud.get_user_by_username(db, user_id)
+                if user:
+                    actual_user_id = str(user.id)
+                    logger.info(f"Resolved username '{user_id}' to database ID: {actual_user_id}")
+                else:
+                    logger.warning(f"Could not find user with username: {user_id}")
+            else:
+                logger.warning("No user_id provided")
+            
+            # Get token from websocket state
+            user_token = getattr(websocket.state, 'user_token', None)
+            logger.info(f"Retrieved user_token from websocket: {'present' if user_token else 'None'}")
+            
             # Send message and get AI response
             result = await openai_service.send_message(
                 db=db,
                 conversation_id=request.conversation_id,
-                content=request.content
+                content=request.content,
+                user_id=actual_user_id,  # Pass actual user ID for MCP tool access
+                user_token=user_token  # Pass user's OAuth token for MCP authentication
             )
             
             # Log message sent
@@ -294,7 +317,7 @@ class WebSocketHandler:
                     role="assistant",
                     token_count=result["ai_response"].tokens_used or 0,
                     response_time=response_time_seconds,
-                    model_used=result.get("ai_response").model
+                    model_used=result["ai_response"].model
                 ))
             
             # Broadcast to conversation participants

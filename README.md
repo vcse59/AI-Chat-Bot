@@ -1,15 +1,16 @@
-# ConvoAI - Intelligent Conversation Platform
+# ConvoAI - Intelligent Conversation Platform with MCP Integration
 
-A production-ready, full-stack AI conversation platform featuring a React frontend, OAuth 2.0 authentication, real-time WebSocket communication, and OpenAI integration. Built with React and FastAPI for a complete microservices solution.
+A production-ready, full-stack AI conversation platform featuring Model Context Protocol (MCP) integration, React frontend, OAuth 2.0 authentication, real-time WebSocket communication, and OpenAI function calling. Built with React and FastAPI for a complete microservices solution.
 
 ## 🌟 Overview
 
-This platform consists of four main components working together to provide a secure, intelligent chatbot experience with comprehensive analytics:
+This platform consists of five main components working together to provide a secure, intelligent chatbot experience with comprehensive analytics and extensible tool support:
 
-1. **React Chat Frontend** (Port 3000) - Modern, responsive web UI with real-time messaging and integrated analytics panel
+1. **React Chat Frontend** (Port 3000) - Modern, responsive web UI with real-time messaging, integrated analytics, and MCP server management
 2. **Authorization Server** (Port 8001) - OAuth 2.0 authentication and role-based access control
-3. **ChatBot Service** (Port 8000) - AI-powered conversations with OpenAI and WebSocket support
+3. **ChatBot Service** (Port 8000) - AI-powered conversations with OpenAI function calling, WebSocket support, and MCP integration
 4. **Analytics Service** (Port 8002) - Admin-only analytics and metrics tracking with real-time updates
+5. **MCP Servers** (Port 8003+) - Extensible tool servers following Model Context Protocol standard
 
 ### 🚀 Deployment Options
 
@@ -18,6 +19,9 @@ This platform consists of four main components working together to provide a sec
 
 ### 🎯 Key Highlights
 
+- 🔌 **MCP Integration**: Model Context Protocol support for extensible AI tools
+- 🛠️ **Tool Management**: User-friendly interface to register and manage MCP servers
+- 🔐 **Auto Authentication**: User tokens automatically passed to MCP servers
 - 📊 **Integrated Analytics Panel**: View metrics alongside chat without leaving the conversation
 - 🔄 **Real-time Tracking**: Automatic refresh of analytics data every 30 seconds
 - 🎫 **Token Tracking**: Monitor OpenAI API token usage across all conversations
@@ -30,13 +34,7 @@ This platform consists of four main components working together to provide a sec
 ┌─────────────────────────────────────────────────────────────────┐
 │                        User Browser                              │
 │                    http://localhost:3000                         │
-└────────────┬────────────────────────────────────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        User Browser                              │
-│                    http://localhost:3000                         │
-│  Features: Chat Interface + Real-time Analytics Side Panel       │
+│  Features: Chat Interface + Analytics + MCP Management           │
 └────────────┬────────────────────────────────────────────────────┘
              │
              ▼
@@ -44,7 +42,7 @@ This platform consists of four main components working together to provide a sec
 │                    React Chat Frontend                          │
 │                      (Port 3000)                                │
 │  - Login/Register UI         - Analytics Side Panel            │
-│  - Chat Interface            - State Management                 │
+│  - Chat Interface            - MCP Server Management            │
 │  - WebSocket Client          - OAuth 2.0 Integration            │
 │  - Conversation List         - Real-time Metrics Display        │
 └──────┬─────────────────────────────────────────┬──────┬─────────┘
@@ -60,20 +58,31 @@ This platform consists of four main components working together to provide a sec
 │ - JWT Tokens     │    │ - Messages       │   │ - Activity Logs  │
 │ - RBAC           │    │ - WebSocket      │   │ - User Stats     │
 │ - Activity Track │───►│ - OpenAI API     │   │ - Token Counting │
-│                  │    │ - Analytics MW   │───│ - Admin API      │
+│                  │    │ - MCP Tools      │───│ - Admin API      │
+│                  │    │ - Function Call  │   │                  │
 └────────┬─────────┘    └────────┬─────────┘   └────────┬─────────┘
-         │                       │                      │
-         ▼                       ▼                      ▼
-  ┌─────────────┐        ┌──────────────┐      ┌──────────────┐
-  │  auth.db    │        │conversations.│      │ analytics.db │
-  │  (SQLite)   │        │   db         │      │  (SQLite)    │
-  │             │        │  (SQLite)    │      │              │
-  │ - users     │        │              │      │ - user_activity
-  │ - roles     │        │- conversations      │ - conversations
-  │ - user_roles│        │- messages    │      │ - messages   │
-  └─────────────┘        └──────────────┘      │ - api_usage  │
-                                               │ - daily_stats│
-                                               └──────────────┘
+         │                       │ ▲                    │
+         ▼                       │ │ MCP Protocol       ▼
+  ┌─────────────┐        ┌──────┴─┴──────┐      ┌──────────────┐
+  │  auth.db    │        │ conversations.│      │ analytics.db │
+  │  (SQLite)   │        │   db          │      │  (SQLite)    │
+  │             │        │  (SQLite)     │      │              │
+  │ - users     │        │               │      │ - user_activity
+  │ - roles     │        │- conversations│      │ - conversations
+  │ - user_roles│        │- messages     │      │ - messages   │
+  │ - mcp_servers        │- mcp_servers  │      │ - api_usage  │
+  └─────────────┘        └───────┬───────┘      │ - daily_stats│
+                                 │              └──────────────┘
+                                 │ JSON-RPC
+                                 ▼
+                         ┌───────────────┐
+                         │  MCP Servers  │
+                         │  (Port 8003+) │
+                         │               │
+                         │ - Timezone    │
+                         │ - Weather     │
+                         │ - Custom...   │
+                         └───────────────┘
 ```
 
 ## ✨ Key Features
@@ -82,6 +91,10 @@ This platform consists of four main components working together to provide a sec
 - 🎨 **Modern UI**: Gradient themes, responsive design, smooth animations
 - 🔐 **Secure Authentication**: OAuth 2.0 with JWT tokens
 - 💬 **Real-time Chat**: WebSocket-based instant messaging
+- 🔌 **MCP Server Management**: Register and manage AI tool servers
+  - Simple form-based registration
+  - User-scoped server configuration
+  - Automatic authentication handling
 - 📊 **Analytics Side Panel**: View metrics alongside conversations (Admin-only)
   - Total users, active users, conversations, messages, tokens
   - Recent user activity with timestamps
@@ -96,7 +109,12 @@ This platform consists of four main components working together to provide a sec
 - 🔒 **OAuth 2.0 Security**: Industry-standard authentication
 - 👥 **User Management**: Registration, login, profile management
 - 🎭 **Role-Based Access Control**: Admin, user, manager roles
-- 🤖 **OpenAI Integration**: AI-powered chat responses
+- 🤖 **OpenAI Function Calling**: AI-powered chat with tool execution
+- 🔌 **MCP Protocol Support**: Model Context Protocol integration
+  - JSON-RPC 2.0 transport
+  - Tool discovery from registered servers
+  - Automatic function calling
+  - User token authentication to MCP servers
 - 🔌 **WebSocket Support**: Real-time bidirectional communication
 - 🔑 **Hash-based IDs**: Secure, non-sequential identifiers
 - 📊 **RESTful API**: Complete CRUD operations
@@ -309,6 +327,106 @@ tests\run_tests.bat coverage      # With coverage report
 
 See [tests/README.md](tests/README.md) for detailed testing documentation.
 
+## 🔌 MCP (Model Context Protocol) Integration
+
+ConvoAI supports the Model Context Protocol, allowing users to extend AI capabilities with custom tools and integrations.
+
+### What is MCP?
+
+MCP is a standardized protocol that enables AI assistants to discover and use external tools. It uses JSON-RPC 2.0 for communication and provides a consistent interface for tool discovery and execution.
+
+### Key Features
+
+- **User-Scoped Registration**: Each user can register their own MCP servers
+- **Automatic Authentication**: User OAuth tokens automatically passed to MCP servers
+- **Tool Discovery**: Automatic discovery of available tools from registered servers
+- **OpenAI Function Calling**: Seamless integration with OpenAI's function calling API
+- **Secure Communication**: All MCP calls use user authentication tokens
+
+### How to Use
+
+1. **Register an MCP Server**:
+   - Click "🔌 MCP Servers" button in the chat interface
+   - Click "+ Add MCP Server"
+   - Fill in:
+     - Name: A friendly name for the server
+     - Description: What the server does
+     - Server URL: The MCP endpoint (e.g., `http://timezone-mcp-server:8003/mcp`)
+     - Active: Enable/disable the server
+   - Click "Create Server"
+
+2. **Use MCP Tools in Chat**:
+   - Simply ask questions that match the tool's capabilities
+   - Example: "What time is it in Tokyo?" (uses timezone MCP server)
+   - The AI will automatically discover and call the appropriate tools
+
+3. **Manage MCP Servers**:
+   - View all your registered servers
+   - Edit server details
+   - Activate/deactivate servers
+   - Delete unused servers
+
+### Creating Custom MCP Servers
+
+See [MCP_README.md](MCP_README.md) for detailed MCP implementation guide and [timezone-mcp-server/README.md](timezone-mcp-server/README.md) for a reference implementation.
+
+**Basic Structure**:
+```python
+# MCP Server Example (FastAPI)
+@app.post("/mcp")
+async def mcp_endpoint(request: dict, authorization: str = Header(None)):
+    method = request.get("method")
+    
+    if method == "tools/list":
+        return {
+            "jsonrpc": "2.0",
+            "id": request.get("id"),
+            "result": {
+                "tools": [
+                    {
+                        "name": "my_tool",
+                        "description": "Description of what the tool does",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "param1": {"type": "string"}
+                            },
+                            "required": ["param1"]
+                        }
+                    }
+                ]
+            }
+        }
+    
+    elif method == "tools/call":
+        # Implement tool execution logic
+        return {
+            "jsonrpc": "2.0",
+            "id": request.get("id"),
+            "result": {
+                "content": [
+                    {"type": "text", "text": "Tool result"}
+                ]
+            }
+        }
+```
+
+### Included MCP Servers
+
+#### Timezone Server (Port 8003)
+- **Purpose**: Get current time in any timezone
+- **Tool**: `get_current_time`
+- **Parameters**: `timezone` (IANA timezone identifier)
+- **Example**: "What time is it in London?"
+
+### MCP Server Requirements
+
+1. Implement JSON-RPC 2.0 protocol
+2. Support `tools/list` method for tool discovery
+3. Support `tools/call` method for tool execution
+4. Handle Bearer token authentication (user OAuth token)
+5. Return results in MCP-compliant format
+
 ## 🚀 Quick Start
 
 Choose your deployment method:
@@ -387,7 +505,204 @@ chmod +x scripts/linux-mac/*.sh
 # 5. Access: http://localhost:3000
 ```
 
-**📚 For detailed local setup instructions, see [QUICK_START_LOCAL.md](docs/QUICK_START_LOCAL.md)**
+### Option 3: Manual Local Setup (Host Machine)
+
+**Prerequisites:**
+- Python 3.12+
+- Node.js 18+
+- OpenAI API Key
+- Terminal/Command Prompt
+
+**Step 1: Environment Setup**
+
+```bash
+# Clone repository
+git clone <repository-url>
+cd AI-Chat-Bot
+
+# Create .env file
+cp .env.example .env
+# Edit .env and set:
+#   AUTH_SECRET_KEY=<generate-secure-key>
+#   OPENAI_API_KEY=sk-your-openai-api-key
+```
+
+**Step 2: Auth Service Setup**
+
+```bash
+# Navigate to auth service
+cd auth-service
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -e .
+
+# Start auth service (in new terminal)
+uvicorn auth_server.main:app --host 0.0.0.0 --port 8001
+```
+
+**Step 3: Chat Service Setup**
+
+```bash
+# Navigate to chat service (new terminal)
+cd chat-service
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start chat service
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+**Step 4: Analytics Service Setup**
+
+```bash
+# Navigate to analytics service (new terminal)
+cd analytics-service
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start analytics service
+uvicorn main:app --host 0.0.0.0 --port 8002
+```
+
+**Step 5: Timezone MCP Server Setup**
+
+```bash
+# Navigate to timezone MCP server (new terminal)
+cd timezone-mcp-server
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start MCP server
+uvicorn main:app --host 0.0.0.0 --port 8003
+```
+
+**Step 6: Frontend Setup**
+
+```bash
+# Navigate to frontend (new terminal)
+cd chat-frontend
+
+# Install dependencies
+npm install
+
+# Create .env file
+cp .env.example .env
+# Defaults should work for local development:
+#   REACT_APP_AUTH_API_URL=http://localhost:8001
+#   REACT_APP_CHAT_API_URL=http://localhost:8000
+#   REACT_APP_ANALYTICS_API_URL=http://localhost:8002
+#   REACT_APP_WS_URL=ws://localhost:8000
+
+# Start frontend
+npm start
+```
+
+**Step 7: Create Admin User**
+
+```bash
+# In auth-service directory with activated venv
+python -c "
+import sys
+sys.path.insert(0, '.')
+from auth_server.database.db import init_db
+from auth_server.models.user import User
+from auth_server.models.role import Role
+from auth_server.models.user_role import UserRole
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
+init_db()
+from auth_server.database.db import SessionLocal
+
+db = SessionLocal()
+pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+
+# Create admin role if not exists
+admin_role = db.query(Role).filter(Role.name == 'admin').first()
+if not admin_role:
+    admin_role = Role(name='admin', description='Administrator')
+    db.add(admin_role)
+    db.commit()
+
+# Create admin user
+admin = db.query(User).filter(User.username == 'admin').first()
+if not admin:
+    admin = User(
+        username='admin',
+        email='admin@example.com',
+        hashed_password=pwd_context.hash('admin123'),
+        full_name='Admin User',
+        is_active=True
+    )
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    
+    # Assign admin role
+    user_role = UserRole(user_id=admin.id, role_id=admin_role.id)
+    db.add(user_role)
+    db.commit()
+    print('Admin user created successfully')
+else:
+    print('Admin user already exists')
+
+db.close()
+"
+```
+
+**Step 8: Access Application**
+
+- Frontend: http://localhost:3000
+- Login with: `admin` / `admin123`
+- Auth API Docs: http://localhost:8001/docs
+- Chat API Docs: http://localhost:8000/docs
+- Analytics API Docs: http://localhost:8002/docs
+
+**Service URLs for MCP Registration:**
+- When registering MCP servers in the UI, use:
+  - For local host: `http://localhost:8003/mcp`
+  - For Docker: `http://timezone-mcp-server:8003/mcp`
+
+**📚 For scripted local setup, see [QUICK_START_LOCAL.md](docs/QUICK_START_LOCAL.md)**
 
 ## 📖 Usage Guide
 
@@ -1085,21 +1400,23 @@ curl http://localhost:8000/conversations/ \
 
 ## 📚 Additional Documentation
 
-- [Quick Start Local Development](./docs/QUICK_START_LOCAL.md) ⭐ **NEW** - Detailed local setup guide
+- [Quick Start Local Development](./docs/QUICK_START_LOCAL.md) ⭐ **Detailed local/host setup guide**
+- [CHANGELOG](./CHANGELOG.md) ⭐ **Complete version history and changes**
+- [MCP Implementation Guide](./MCP_README.md) - Model Context Protocol integration details
 - [Scripts Documentation](./scripts/README.md) - Platform-specific management scripts
 - [Utility Scripts](./utils/README.md) - Database utilities and standalone test scripts
-- [Frontend README](./chat-frontend/README.md)
-- [Auth Server README](./auth-service/README.md)
-- [ChatBot Service README](./chat-service/README.md)
-- [Analytics Service README](./analytics-service/README.md)
-- [**Analytics Integration Guide**](./docs/ANALYTICS_GUIDE.md) ⭐ - Complete analytics documentation
-- [CHANGELOG](./docs/CHANGELOG.md) - Complete change history
-- [Testing Documentation](./tests/README.md)
+- [Testing Documentation](./tests/README.md) - Test suite overview
+- [Frontend README](./chat-frontend/README.md) - React frontend details
+- [Auth Server README](./auth-service/README.md) - OAuth 2.0 authentication service
+- [ChatBot Service README](./chat-service/README.md) - Chat API with MCP integration
+- [Analytics Service README](./analytics-service/README.md) - Metrics and tracking
+- [Timezone MCP Server README](./timezone-mcp-server/README.md) - Reference MCP implementation
+- [Analytics Integration Guide](./docs/ANALYTICS_GUIDE.md) - Complete analytics documentation
 - [All Documentation](./docs/) - Complete documentation index
 
 ## 🐛 Known Issues & Fixes
 
-All major issues have been resolved in the latest version:
+All major issues have been resolved in version 2.0.0:
 
 - ✅ **Login failures** - Fixed JWT token SECRET_KEY configuration
 - ✅ **Conversation creation** - Fixed user auto-provisioning
@@ -1111,8 +1428,9 @@ All major issues have been resolved in the latest version:
 - ✅ **Analytics dashboard loading** - Fixed JWT verification and service communication
 - ✅ **Database path issues** - Implemented absolute paths for all databases
 - ✅ **Cross-platform script support** - Added Windows and Linux/Mac script organization
+- ✅ **MCP integration** - Fixed token passing and server URL issues
 
-See [CHANGELOG.md](./docs/CHANGELOG.md) for detailed fix information.
+See [CHANGELOG.md](./CHANGELOG.md) for detailed version history.
 
 ## 🤝 Contributing
 

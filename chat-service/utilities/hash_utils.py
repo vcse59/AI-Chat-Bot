@@ -82,6 +82,29 @@ def generate_message_hash(conversation_id: str, content: str, role: str) -> str:
     # Return first 10 characters for message IDs
     return hash_hex[:10]
 
+def generate_hash_id(prefix: str = "", length: int = 12) -> str:
+    """
+    Generate a generic hash ID with optional prefix
+    
+    Args:
+        prefix: Optional prefix for the ID (e.g., 'mcp', 'srv')
+        length: Length of the hash portion (default: 12)
+        
+    Returns:
+        A unique hash string, optionally prefixed
+    """
+    timestamp = str(int(time.time() * 1000000))
+    salt = secrets.token_hex(8)
+    
+    hash_input = f"{prefix}:{timestamp}:{salt}"
+    hash_object = hashlib.sha256(hash_input.encode('utf-8'))
+    hash_hex = hash_object.hexdigest()
+    
+    # Return prefixed hash if prefix provided
+    if prefix:
+        return f"{prefix}_{hash_hex[:length]}"
+    return hash_hex[:length]
+
 def is_valid_hash_id(hash_id: str, expected_length: int) -> bool:
     """
     Validate if a string is a valid hash ID

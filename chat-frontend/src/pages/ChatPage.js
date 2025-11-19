@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ConversationList from '../components/ConversationList';
 import ChatWindow from '../components/ChatWindow';
+import MCPServerManager from '../components/MCPServerManager';
 import analyticsService from '../services/analyticsService';
 import MetricsCard from '../components/MetricsCard';
 import './ChatPage.css';
@@ -10,6 +11,7 @@ import './ChatPage.css';
 const ChatPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showMCPServers, setShowMCPServers] = useState(false);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const { user, logout, isAdmin } = useAuth();
@@ -136,6 +138,9 @@ const ChatPage = () => {
               </button>
             </>
           )}
+          <button onClick={() => setShowMCPServers(!showMCPServers)} className={`mcp-button ${showMCPServers ? 'active' : ''}`}>
+            🔌 MCP Servers {showMCPServers ? '✓' : ''}
+          </button>
           <span className="username">👤 {user?.username}</span>
           <button onClick={handleLogout} className="logout-button">
             Logout
@@ -144,12 +149,18 @@ const ChatPage = () => {
       </div>
       
       <div className="chat-content">
-        <ConversationList
-          selectedConversationId={selectedConversationId}
-          onSelectConversation={setSelectedConversationId}
-          onConversationDeleted={handleConversationDeleted}
-        />
-        <ChatWindow conversationId={selectedConversationId} />
+        {showMCPServers ? (
+          <MCPServerManager />
+        ) : (
+          <>
+            <ConversationList
+              selectedConversationId={selectedConversationId}
+              onSelectConversation={setSelectedConversationId}
+              onConversationDeleted={handleConversationDeleted}
+            />
+            <ChatWindow conversationId={selectedConversationId} />
+          </>
+        )}
         
         {/* Analytics Side Panel */}
         {showAnalytics && (

@@ -74,16 +74,20 @@ class OpenAIConversationService:
         db: Session,
         conversation_id: str,  # Changed from int to str for hash-based IDs
         content: str,
-        role: schemas.MessageRole = schemas.MessageRole.USER
+        role: schemas.MessageRole = schemas.MessageRole.USER,
+        user_id: Optional[str] = None,  # Added for MCP tool access
+        user_token: Optional[str] = None  # Added for MCP authentication
     ) -> Dict[str, Any]:
         """
-        Send a message and get AI response
+        Send a message and get AI response with MCP tool routing
         
         Args:
             db: Database session
             conversation_id: Conversation ID
             content: Message content
             role: Message role (default: USER)
+            user_id: User ID for MCP tool access
+            user_token: OAuth token for MCP server authentication
             
         Returns:
             Dict containing user message and AI response
@@ -122,8 +126,114 @@ class OpenAIConversationService:
                     "content": msg.content
                 })
             
-            # Call OpenAI API
-            response = await self._call_openai_api(openai_messages)
+            # --- MCP Tool Integration ---
+            response_content = None
+            response_metadata = {}
+            tokens_used = None
+            
+            logger.info(f"send_message called with user_id={user_id}, user_token={'present' if user_token else 'None'}")
+            
+            if user_id:
+                # Try to use MCP tools if available
+                from .mcp_tools_service import MCPToolsService
+                
+                logger.info(f"Creating MCPToolsService with user_token={'present' if user_token else 'None'}")
+                mcp_service = MCPToolsService(db, user_id, user_token)
+                try:
+                    # Discover available MCP tools
+                    available_tools = await mcp_service.get_available_tools()
+                    
+                    if available_tools:
+                        # Convert MCP tools to OpenAI function format
+                        openai_functions = []
+                        tool_map = {}  # Map function names to (server_id, tool_name)
+                        
+                        for server_data in available_tools:
+                            server_id = server_data["server_id"]
+                            server_tools = server_data["tools"]
+                            
+                            for tool in server_tools:
+                                tool_name = tool.get("name")
+                                function_def = {
+                                    "name": tool_name,
+                                    "description": tool.get("description", ""),
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": tool.get("parameters", {}),
+                                        "required": []
+                                    }
+                                }
+                                openai_functions.append(function_def)
+                                tool_map[tool_name] = (server_id, tool_name)
+                        
+                        # Call OpenAI with function calling
+                        try:
+                            response = await self._call_openai_api(
+                                openai_messages, 
+                                functions=openai_functions
+                            )
+                            
+                            # Check if OpenAI wants to call a function
+                            if response.get("function_call"):
+                                function_name = response["function_call"]["name"]
+                                function_args_str = response["function_call"]["arguments"]
+                                
+                                import json
+                                function_args = json.loads(function_args_str)
+                                
+                                server_id, tool_name = tool_map[function_name]
+                                
+                                logger.info(f"OpenAI requested MCP tool: {tool_name} with args: {function_args}")
+                                
+                                # Call the MCP tool
+                                tool_result = await mcp_service.call_tool(
+                                    server_id,
+                                    tool_name,
+                                    function_args
+                                )
+                                
+                                # Format the tool result as response
+                                if "error" in tool_result:
+                                    response_content = f"I tried to get that information but encountered an error: {tool_result['error']}"
+                                else:
+                                    # Let the LLM format the tool result
+                                    result_str = json.dumps(tool_result.get("result", tool_result))
+                                    
+                                    # Add function result to messages and get final response
+                                    messages_with_result = openai_messages + [
+                                        {"role": "assistant", "content": None, "function_call": response["function_call"]},
+                                        {"role": "function", "name": function_name, "content": result_str}
+                                    ]
+                                    
+                                    final_response = await self._call_openai_api(messages_with_result)
+                                    response_content = final_response["content"]
+                                    tokens_used = response.get("tokens_used", 0) + final_response.get("tokens_used", 0)
+                                    
+                                response_metadata = {
+                                    "mcp_tool_used": True,
+                                    "tool_name": tool_name,
+                                    "server_id": server_id,
+                                    "tool_result": tool_result
+                                }
+                            else:
+                                # OpenAI responded directly without using tools
+                                response_content = response["content"]
+                                tokens_used = response.get("tokens_used")
+                                response_metadata = {"mcp_tool_used": False}
+                        except Exception as e:
+                            logger.error(f"Error in MCP function calling: {e}")
+                            # Fall back to normal response
+                            response_content = None
+                    
+                finally:
+                    await mcp_service.close()
+            
+            # If no MCP response generated, fall back to standard OpenAI call
+            if response_content is None:
+                response = await self._call_openai_api(openai_messages)
+                response_content = response["content"]
+                tokens_used = response.get("tokens_used")
+                response_metadata.update(response.get("metadata", {}))
             
             # Calculate total response time
             end_time = get_utc_now()
@@ -133,11 +243,11 @@ class OpenAIConversationService:
             ai_message = schemas.ChatMessageCreate(
                 conversation_id=conversation_id,
                 role=schemas.MessageRole.ASSISTANT,
-                content=response["content"],
+                content=response_content,
                 model=self.model,
-                tokens_used=response.get("tokens_used"),
+                tokens_used=tokens_used,
                 response_time=response_time_ms,
-                metadata=response.get("metadata")
+                metadata=response_metadata
             )
             saved_ai_message = crud.create_message(db, message=ai_message)
             
@@ -210,12 +320,13 @@ class OpenAIConversationService:
             logger.error(f"Error getting conversation context: {str(e)}")
             raise
     
-    async def _call_openai_api(self, messages: List[Dict[str, str]]) -> Dict[str, Any]:
+    async def _call_openai_api(self, messages: List[Dict[str, str]], functions: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         """
         Call OpenAI API with error handling and token tracking
         
         Args:
             messages: List of messages for OpenAI API
+            functions: Optional list of function definitions for OpenAI function calling
             
         Returns:
             Dict containing response content and metadata
@@ -224,20 +335,30 @@ class OpenAIConversationService:
             # Record start time for performance logging
             start_time = get_utc_now()
             
+            # Prepare API call parameters
+            api_params = {
+                "model": self.model,
+                "messages": messages,
+                "max_tokens": 1000,
+                "temperature": 0.7
+            }
+            
+            # Add functions if provided
+            if functions:
+                api_params["functions"] = functions
+                api_params["function_call"] = "auto"
+            
             # Use the new OpenAI v1.x API
-            response = await self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                max_tokens=1000,
-                temperature=0.7
-            )
+            response = await self.client.chat.completions.create(**api_params)
             
             # Calculate response time
             end_time = get_utc_now()
             response_time_ms = (end_time - start_time).total_seconds() * 1000
             
+            message = response.choices[0].message
+            
             result = {
-                "content": response.choices[0].message.content,
+                "content": message.content,
                 "tokens_used": response.usage.total_tokens,
                 "metadata": {
                     "model": self.model,
@@ -246,6 +367,13 @@ class OpenAIConversationService:
                     "completion_tokens": response.usage.completion_tokens
                 }
             }
+            
+            # Include function_call if present
+            if hasattr(message, 'function_call') and message.function_call:
+                result["function_call"] = {
+                    "name": message.function_call.name,
+                    "arguments": message.function_call.arguments
+                }
             
             # Log successful API call
             log_openai_api_call(

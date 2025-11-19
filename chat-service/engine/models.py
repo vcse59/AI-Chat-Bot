@@ -78,3 +78,21 @@ class Category(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class MCPServer(Base):
+    __tablename__ = "mcp_servers"
+
+    id = Column(String(12), primary_key=True, index=True)  # Hash-based ID
+    user_id = Column(String(16), ForeignKey("users.id"), nullable=False)  # Hash-based foreign key
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    server_url = Column(String(500), nullable=False)
+    auth_type = Column(String(50), default="none")  # Authentication type: none, bearer, api_key
+    api_key = Column(String(500), nullable=True)  # Optional API key for MCP server
+    is_active = Column(Boolean, default=True)
+    config = Column(JSON, nullable=True)  # Additional configuration
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationship with user
+    owner = relationship("User", backref="mcp_servers")
