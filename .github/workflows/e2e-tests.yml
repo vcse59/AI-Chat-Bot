@@ -1,5 +1,9 @@
 name: E2E Tests CI
 
+permissions:
+  contents: read
+  issues: write
+
 on:
   push:
     branches: [ main, develop ]
