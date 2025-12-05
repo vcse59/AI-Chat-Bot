@@ -60,7 +60,7 @@ async def get_current_user(
     
     try:
         # Decode JWT token
-        logger.info(f"Attempting to decode token with SECRET_KEY: {SECRET_KEY[:10]}...")
+        logger.info("Attempting to decode token with configured secret key...")
         logger.info(f"Token (first 20 chars): {token[:20]}...")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         logger.info(f"Token decoded successfully. Payload: {payload}")
@@ -78,7 +78,7 @@ async def get_current_user(
     except JWTError as e:
         logger.error(f"JWTError occurred: {str(e)}")
         logger.error(f"Token that failed: {token[:50]}...")
-        logger.error(f"SECRET_KEY used: {SECRET_KEY[:10]}...")
+        logger.error("A secret key was used for token validation (key not shown for security).")
         raise credentials_exception
 
 
