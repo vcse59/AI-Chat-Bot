@@ -465,7 +465,7 @@ async def handle_mcp_post(request: Request):
         logger.error(f"Error handling MCP POST: {e}", exc_info=True)
         return {
             "jsonrpc": "2.0",
-            "error": {"code": -32603, "message": str(e)}
+            "error": {"code": -32603, "message": "Internal server error"}
         }
 
 
