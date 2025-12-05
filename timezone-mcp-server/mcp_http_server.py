@@ -393,10 +393,11 @@ async def handle_mcp_post(request: Request):
         message = await request.json()
         msg_id = message.get("id")
     except Exception as e:
+        logger.error(f"Failed to parse MCP POST body: {e}", exc_info=True)
         return {
             "jsonrpc": "2.0",
             "id": None,
-            "error": {"code": -32700, "message": f"Parse error: {str(e)}"}
+            "error": {"code": -32700, "message": "Parse error: invalid JSON"}
         }
     
     # Verify authentication
