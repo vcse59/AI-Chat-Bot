@@ -574,7 +574,7 @@ async def handle_messages(request: Request):
         logger.error(f"Error handling message: {e}", exc_info=True)
         return {
             "jsonrpc": "2.0",
-            "error": {"code": -32603, "message": str(e)}
+            "error": {"code": -32603, "message": "Internal server error"}
         }
 
 
