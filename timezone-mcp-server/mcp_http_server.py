@@ -367,7 +367,7 @@ async def handle_sse(request: Request):
                     
         except Exception as e:
             logger.error(f"SSE streaming error: {e}", exc_info=True)
-            yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+            yield f"event: error\ndata: {json.dumps({'error': 'Internal server error'})}\n\n"
         finally:
             # Cleanup session
             if session_id in mcp_sessions:
