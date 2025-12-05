@@ -78,95 +78,175 @@ This service integrates with the Authorization Server for secure authentication:
 
 ## 🚀 Quick Start
 
-### Docker Deployment (Recommended)
+### Option 1: Docker Compose (Recommended for Full Platform)
 
-Run with full platform from project root:
+Run with the full ConvoAI platform from project root:
 
 ```bash
-docker-compose up chat-service
+docker-compose up openai-chatbot
 ```
 
 See main [README.md](../README.md) for complete Docker setup.
 
-### Local Development
+### Option 2: Standalone Docker Container
+
+**Prerequisites:** Auth service must be running first.
+
+```bash
+# Navigate to chat-service directory
+cd chat-service
+
+# Copy and configure environment
+cp .env.example .env
+# Edit .env - set OPENAI_API_KEY, AUTH_SECRET_KEY, and AUTH_SERVICE_URL
+
+# Build the Docker image
+docker build -t chat-service .
+
+# Run the container
+docker run -d \
+  --name openai-chatbot \
+  -p 8000:8000 \
+  --env-file .env \
+  -v $(pwd)/data:/app/data \
+  chat-service
+
+# Check logs
+docker logs -f openai-chatbot
+
+# Stop the container
+docker stop openai-chatbot
+```
+
+**Windows (PowerShell):**
+```powershell
+# Run the container
+docker run -d `
+  --name openai-chatbot `
+  -p 8000:8000 `
+  --env-file .env `
+  -v ${PWD}/data:/app/data `
+  chat-service
+
+# Check logs
+docker logs -f openai-chatbot
+
+# Stop the container
+docker stop openai-chatbot
+```
+
+**Windows (Command Prompt):**
+```cmd
+REM Run the container
+docker run -d --name openai-chatbot -p 8000:8000 --env-file .env -v %cd%/data:/app/data chat-service
+
+REM Check logs
+docker logs -f openai-chatbot
+
+REM Stop the container
+docker stop openai-chatbot
+```
+
+### Option 3: Local Development (Without Docker)
 
 **Prerequisites:**
 - Python 3.12+
 - OpenAI API Key
 - Auth service running (for authentication)
 
-**Setup:**
+**Setup Steps:**
 
-1. **Install dependencies:**
+1. **Navigate to service directory:**
    ```bash
    cd chat-service
-   pip install -e .
-   
-   # For development
-   pip install -e .[dev]
    ```
 
-2. **Configure environment:**
+2. **Create and activate virtual environment:**
    
-   Ensure root `.env` exists:
-   ```env
-   # ConvoAI/.env
-   AUTH_SECRET_KEY=your-secret-key-here
-   OPENAI_API_KEY=your-openai-key-here
+   **Windows:**
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
    ```
    
-   Service `.env`:
-   ```env
-   # chat-service/.env
-   PORT=8000
-   HOST=0.0.0.0
-   AUTH_SERVICE_URL=http://localhost:8001
-   ANALYTICS_SERVICE_URL=http://localhost:8002
-   CORS_ORIGINS=http://localhost:3000
-   ```
-
-3. **Run the service:**
+   **Linux/Mac:**
    ```bash
-   # Method 1: Using uvicorn
-   uvicorn main:app --reload --port 8000
-   
-   # Method 2: Using Python directly
-   python main.py
+   python -m venv venv
+   source venv/bin/activate
    ```
 
-**Using Platform Scripts** (from project root):
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-**Windows:**
-```cmd
-scripts\windows\start-chat-service.bat
+4. **Configure environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your settings:
+   # - OPENAI_API_KEY (required)
+   # - AUTH_SECRET_KEY (must match auth-service)
+   # - AUTH_SERVICE_URL=http://localhost:8001
+   ```
+
+5. **Create data directory:**
+   
+   **Linux/Mac:**
+   ```bash
+   mkdir -p data
+   ```
+   
+   **Windows (PowerShell):**
+   ```powershell
+   New-Item -ItemType Directory -Force -Path data
+   ```
+   
+   **Windows (Command Prompt):**
+   ```cmd
+   mkdir data 2>nul
+   ```
+
+6. **Run the service:**
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+**Access Points:**
+- API Documentation: http://localhost:8000/docs
+- Alternative Docs: http://localhost:8000/redoc
+- Health Check: http://localhost:8000/health
+- WebSocket: ws://localhost:8000/ws/{conversation_id}
+
+### Environment Configuration
+
+Copy `.env.example` to `.env` and configure:
+
+```env
+# Required
+OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# Server
+HOST=0.0.0.0
+PORT=8000
+
+# Database
+DATABASE_URL=sqlite:///./data/chatbot.db
+
+# Auth service (must match auth-service settings)
+AUTH_SERVICE_URL=http://localhost:8001
+AUTH_SECRET_KEY=your-secret-key-must-match-auth-service
 ```
 
-**Linux/Mac:**
-```bash
-scripts/linux-mac/start-chat-service.sh
-```
-
-### Access Points
-
-- **API Documentation**: http://localhost:8000/docs
-- **Alternative Docs**: http://localhost:8000/redoc
-- **Health Check**: http://localhost:8000/health
-- **WebSocket**: ws://localhost:8000/ws/{conversation_id}
+See `.env.example` for full configuration options.
 
 ### Database Configuration
 
-Database is automatically created at `chat-service/data/chatbot.db` using absolute paths. No manual configuration needed.
+Database is automatically created at `chat-service/data/chatbot.db`. 
 
 To reset database:
-
-**Windows:**
-```cmd
-del chat-service\data\chatbot.db
-```
-
-**Linux/Mac:**
 ```bash
-rm chat-service/data/chatbot.db
+rm data/chatbot.db  # Linux/Mac
+del data\chatbot.db  # Windows
 ```
 
 Then restart the service to recreate.

@@ -16,6 +16,7 @@ class User(Base):
     _full_name: Mapped[Optional[str]] = mapped_column("full_name", String, nullable=True)
     _hashed_password: Mapped[str] = mapped_column("hashed_password", String)
     _is_active: Mapped[bool] = mapped_column("is_active", Boolean, default=True)
+    _theme_preference: Mapped[str] = mapped_column("theme_preference", String, default="dark", nullable=False)
     roles: Mapped[List["Role"]] = relationship("Role", secondary="user_roles", back_populates="users")
     
     @hybrid_property
@@ -57,3 +58,11 @@ class User(Base):
     @is_active.setter
     def is_active(self, value: bool) -> None:
         self._is_active = value
+
+    @hybrid_property
+    def theme_preference(self) -> str:
+        return self._theme_preference
+        
+    @theme_preference.setter
+    def theme_preference(self, value: str) -> None:
+        self._theme_preference = value

@@ -1,6 +1,7 @@
 """
 MCP Tools Service - Manages interaction with MCP servers
 """
+# pylint: disable=logging-fstring-interpolation,broad-exception-caught
 import httpx
 import logging
 from typing import List, Dict, Any, Optional

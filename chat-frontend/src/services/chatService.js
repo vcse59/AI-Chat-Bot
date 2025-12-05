@@ -222,6 +222,21 @@ class ChatService {
   }
 
   /**
+   * Admin: Delete a user and all their data
+   * @param {string} username - Username to delete
+   * @returns {Promise}
+   */
+  async deleteUserAdmin(username) {
+    try {
+      const api = this._getAxiosInstance();
+      const response = await api.delete(`/api/v1/admin/users/${username}`);
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
    * Handle API errors
    * @private
    */

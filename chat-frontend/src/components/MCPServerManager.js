@@ -2,11 +2,21 @@ import React, { useState, useEffect } from 'react';
 import mcpServerService from '../services/mcpServerService';
 import './MCPServerManager.css';
 
+// Default MCP Server configuration
+const DEFAULT_MCP_SERVER = {
+  name: 'Timezone MCP Server',
+  description: 'Built-in MCP server for timezone conversions, current time queries, and date/time calculations. Useful for scheduling and time-related queries.',
+  server_url: 'http://localhost:8003',
+  is_active: true,
+  isDefault: true,
+};
+
 const MCPServerManager = () => {
   const [servers, setServers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
   const [editingServer, setEditingServer] = useState(null);
   
   // Form state
@@ -111,17 +121,87 @@ const MCPServerManager = () => {
     return <div className="mcp-server-manager loading">Loading MCP servers...</div>;
   }
 
+  // Add default server to display if not already in list
+  const hasDefaultServer = servers.some(s => s.name === DEFAULT_MCP_SERVER.name);
+  const displayServers = hasDefaultServer ? servers : [{ ...DEFAULT_MCP_SERVER, id: 'default' }, ...servers];
+
+  // Function to add default server
+  const handleAddDefaultServer = async () => {
+    try {
+      const { isDefault, ...serverData } = DEFAULT_MCP_SERVER;
+      await mcpServerService.createMCPServer(serverData);
+      await loadServers();
+    } catch (err) {
+      setError('Failed to add default server');
+      console.error(err);
+    }
+  };
+
   return (
     <div className="mcp-server-manager">
       <div className="mcp-header">
-        <h2>MCP Server Management</h2>
-        <button 
-          className="btn btn-primary"
-          onClick={() => setShowAddForm(!showAddForm)}
-        >
-          {showAddForm ? 'Cancel' : '+ Add MCP Server'}
-        </button>
+        <h2>🔌 MCP Server Management</h2>
+        <div className="header-actions">
+          <button 
+            className="btn btn-info"
+            onClick={() => setShowInstructions(!showInstructions)}
+          >
+            {showInstructions ? 'Hide Instructions' : '📖 How to Add MCP Server'}
+          </button>
+          <button 
+            className="btn btn-primary"
+            onClick={() => setShowAddForm(!showAddForm)}
+          >
+            {showAddForm ? 'Cancel' : '+ Add MCP Server'}
+          </button>
+        </div>
       </div>
+
+      {/* Instructions Section */}
+      {showInstructions && (
+        <div className="mcp-instructions">
+          <h3>📚 How to Add and Configure MCP Servers</h3>
+          <div className="instructions-content">
+            <div className="instruction-step">
+              <span className="step-number">1</span>
+              <div className="step-content">
+                <h4>What is MCP?</h4>
+                <p>Model Context Protocol (MCP) servers extend the AI's capabilities by providing additional tools and context. They allow the chat to access external services, databases, and APIs.</p>
+              </div>
+            </div>
+            
+            <div className="instruction-step">
+              <span className="step-number">2</span>
+              <div className="step-content">
+                <h4>Adding a New Server</h4>
+                <p>Click the <strong>"+ Add MCP Server"</strong> button and fill in:</p>
+                <ul>
+                  <li><strong>Server Name:</strong> A friendly name for the server</li>
+                  <li><strong>Description:</strong> What capabilities the server provides</li>
+                  <li><strong>Server URL:</strong> The HTTP endpoint (e.g., http://localhost:8003)</li>
+                  <li><strong>Active:</strong> Enable/disable the server</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="instruction-step">
+              <span className="step-number">3</span>
+              <div className="step-content">
+                <h4>Default Server</h4>
+                <p>The <strong>Timezone MCP Server</strong> is included by default. It provides timezone conversions, current time queries, and date calculations. Click "Add to My Servers" to enable it.</p>
+              </div>
+            </div>
+            
+            <div className="instruction-step">
+              <span className="step-number">4</span>
+              <div className="step-content">
+                <h4>Creating Custom MCP Servers</h4>
+                <p>You can create your own MCP servers following the protocol specification. See the <code>timezone-mcp-server</code> folder in the project for an example implementation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="error-message">
@@ -199,17 +279,56 @@ const MCPServerManager = () => {
       )}
 
       <div className="mcp-servers-list">
+        <h3 className="section-title">📡 Available MCP Servers</h3>
+        
+        {/* Default Server Card - Always shown if not added */}
+        {!hasDefaultServer && (
+          <div className="default-server-section">
+            <div className="server-card default-server">
+              <div className="default-badge">⭐ Recommended</div>
+              <div className="server-header">
+                <h3>🌍 {DEFAULT_MCP_SERVER.name}</h3>
+                <div className="server-status">
+                  <span className="status-badge pending">Not Added</span>
+                </div>
+              </div>
+              
+              <p className="server-description">{DEFAULT_MCP_SERVER.description}</p>
+              
+              <div className="server-details">
+                <div className="detail-item">
+                  <span className="detail-label">URL:</span>
+                  <span className="detail-value">{DEFAULT_MCP_SERVER.server_url}</span>
+                </div>
+              </div>
+              
+              <div className="server-actions">
+                <button 
+                  className="btn btn-success"
+                  onClick={handleAddDefaultServer}
+                >
+                  ✓ Add to My Servers
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {servers.length === 0 ? (
           <div className="empty-state">
-            <p>No MCP servers configured yet.</p>
-            <p>Click "Add MCP Server" to get started.</p>
+            <div className="empty-icon">🔌</div>
+            <p>No custom MCP servers configured yet.</p>
+            <p>Add the default Timezone server above or click "+ Add MCP Server" to add your own.</p>
           </div>
         ) : (
           <div className="servers-grid">
             {servers.map((server) => (
-              <div key={server.id} className={`server-card ${!server.is_active ? 'inactive' : ''}`}>
+              <div key={server.id} className={`server-card ${!server.is_active ? 'inactive' : ''} ${server.name === DEFAULT_MCP_SERVER.name ? 'is-default' : ''}`}>
+                {server.name === DEFAULT_MCP_SERVER.name && (
+                  <div className="default-badge">⭐ Default</div>
+                )}
                 <div className="server-header">
-                  <h3>{server.name}</h3>
+                  <h3>{server.name === DEFAULT_MCP_SERVER.name ? '🌍 ' : ''}{server.name}</h3>
                   <div className="server-status">
                     <span className={`status-badge ${server.is_active ? 'active' : 'inactive'}`}>
                       {server.is_active ? 'Active' : 'Inactive'}

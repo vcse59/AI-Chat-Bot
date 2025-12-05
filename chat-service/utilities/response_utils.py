@@ -1,9 +1,8 @@
 """
 Response utility functions for formatting API responses
 """
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from datetime import datetime
-from pydantic import BaseModel
 
 def create_success_response(
     data: Any = None, 

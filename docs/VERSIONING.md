@@ -2,15 +2,24 @@
 
 ## Current Version
 
-**Version**: 1.0.0  
-**Tag**: v1.0.0  
-**Date**: November 16, 2025
+**Version**: 3.0.0  
+**Tag**: v3.0.0  
+**Date**: December 5, 2025
+
+## Version History
+
+| Version | Date | Description |
+|---------|------|-------------|
+| v3.0.0 | December 5, 2025 | Theme Toggle, Cross-Platform Support, UI Version Display & Documentation Enhancement |
+| v2.0.0 | November 18, 2024 | MCP Integration (Major Feature Release) |
+| v1.1.0 | November 10, 2024 | Analytics Service Integration |
+| v1.0.0 | October 15, 2024 | Initial Production Release |
 
 ## Versioning Strategy
 
 This project follows [Semantic Versioning 2.0.0](https://semver.org/):
 
-**MAJOR.MINOR.PATCH** (e.g., 1.0.0)
+**MAJOR.MINOR.PATCH** (e.g., 3.0.0)
 
 - **MAJOR**: Incompatible API changes
 - **MINOR**: New functionality (backward compatible)
@@ -20,7 +29,7 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/):
 
 The current version is stored in `VERSION` file at project root:
 ```
-1.0.0
+3.0.0
 ```
 
 ## Git Tags
@@ -29,6 +38,9 @@ All releases are tagged in Git with annotated tags:
 ```bash
 git tag -l
 # v1.0.0
+# v1.1.0
+# v2.0.0
+# v3.0.0
 ```
 
 ## View Version History
@@ -38,13 +50,13 @@ git tag -l
 git log --oneline --graph --all --decorate
 
 # View specific tag details
-git show v1.0.0
+git show v3.0.0
 
 # List all tags
 git tag -l
 
 # Show tag message
-git tag -l -n9 v1.0.0
+git tag -l -n9 v3.0.0
 ```
 
 ## Creating New Releases

@@ -122,6 +122,35 @@ services:
     networks:
       - chatbot-network
 
+  # LangChain Workflow Service
+  langchain-service:
+    build: ./langchain-service
+    container_name: langchain-service
+    ports:
+      - "8004:8004"
+    environment:
+      - PORT=8004
+      - HOST=0.0.0.0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CHAT_SERVICE_URL=http://openai-chatbot:8000
+      - AUTH_SERVICE_URL=http://auth-server:8001
+      - LANGCHAIN_MODEL=gpt-3.5-turbo
+      - LANGCHAIN_TEMPERATURE=0.7
+      - LANGCHAIN_MAX_TOKENS=1000
+      - LOG_LEVEL=INFO
+    depends_on:
+      - auth-server
+      - openai-chatbot
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - chatbot-network
+
   # Optional: Add a reverse proxy (nginx) for production
   nginx:
     image: nginx:alpine

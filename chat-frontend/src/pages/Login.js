@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { VERSION } from '../config/version';
 import './Login.css';
 
 const Login = () => {
@@ -9,6 +11,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { refreshTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -19,6 +22,8 @@ const Login = () => {
     try {
       const result = await login(username, password);
       if (result.success) {
+        // Fetch user's theme preference after successful login
+        await refreshTheme();
         navigate('/chat');
       } else {
         setError(result.error || 'Login failed');
@@ -33,8 +38,11 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1 className="login-title">Chat Application</h1>
-        <h2 className="login-subtitle">Sign In</h2>
+        <div className="login-logo">
+          <span className="logo-icon">💬</span>
+          <span className="logo-text">ConvoAI</span>
+        </div>
+        <h2 className="login-subtitle">Sign in to your account</h2>
         
         {error && <div className="error-message">{error}</div>}
         
@@ -73,6 +81,8 @@ const Login = () => {
         <p className="register-link">
           Don't have an account? <Link to="/register">Register here</Link>
         </p>
+        
+        <div className="version-badge">v{VERSION}</div>
       </div>
     </div>
   );

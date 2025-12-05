@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { VERSION } from '../config/version';
 import ConversationList from '../components/ConversationList';
 import ChatWindow from '../components/ChatWindow';
 import MCPServerManager from '../components/MCPServerManager';
@@ -15,6 +17,7 @@ const ChatPage = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const { user, logout, isAdmin } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -126,12 +129,26 @@ const ChatPage = () => {
   return (
     <div className="chat-page">
       <div className="chat-header">
-        <h1>Chat Application</h1>
+        <div className="header-logo">
+          <span className="logo-icon">💬</span>
+          <span className="logo-text">ConvoAI</span>
+          <span className="version-badge">v{VERSION}</span>
+        </div>
         <div className="user-info">
+          <button
+            onClick={() => navigate('/workflows')}
+            className="workflow-button"
+            title="Open LangChain Workflows"
+          >
+            🧩 LangChain Workflows
+          </button>
           {isAdmin() && (
             <>
               <button onClick={handleToggleAnalytics} className={`analytics-button ${showAnalytics ? 'active' : ''}`}>
                 📊 Analytics {showAnalytics ? '✓' : ''}
+              </button>
+              <button onClick={() => navigate('/user-management')} className="admin-button">
+                👥 User Management
               </button>
               <button onClick={handleNavigateToRegisterAdmin} className="admin-button">
                 👤 Create Admin
@@ -140,6 +157,9 @@ const ChatPage = () => {
           )}
           <button onClick={() => setShowMCPServers(!showMCPServers)} className={`mcp-button ${showMCPServers ? 'active' : ''}`}>
             🔌 MCP Servers {showMCPServers ? '✓' : ''}
+          </button>
+          <button onClick={toggleTheme} className="theme-toggle-button" title={`Switch to ${isDark ? 'light' : 'dark'} mode`}>
+            {isDark ? '☀️ Light' : '🌙 Dark'}
           </button>
           <span className="username">👤 {user?.username}</span>
           <button onClick={handleLogout} className="logout-button">

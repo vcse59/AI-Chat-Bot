@@ -1,12 +1,10 @@
-import openai
-from openai import AsyncOpenAI
+# pylint: disable=logging-fstring-interpolation,broad-exception-caught
+from openai import AsyncOpenAI, RateLimitError, BadRequestError, AuthenticationError
 from typing import List, Optional, Dict, Any, Sequence
 from sqlalchemy.orm import Session
-from engine import models, schemas, crud
-from engine.database import get_database
+from engine import schemas, crud
 from utilities.logging_utils import log_openai_api_call, setup_logger
 from utilities.datetime_utils import get_utc_now
-import logging
 
 logger = setup_logger(__name__)
 
@@ -386,25 +384,25 @@ class OpenAIConversationService:
             
             return result
             
-        except openai.RateLimitError as e:
+        except RateLimitError:
             error_msg = "API rate limit exceeded. Please try again later."
             log_openai_api_call(logger, model=self.model, success=False, error=error_msg)
-            raise ValueError(error_msg)
+            raise ValueError(error_msg) from None
         
-        except openai.BadRequestError as e:
+        except BadRequestError as e:
             error_msg = "Invalid request to OpenAI API"
             log_openai_api_call(logger, model=self.model, success=False, error=str(e))
-            raise ValueError(error_msg)
+            raise ValueError(error_msg) from e
         
-        except openai.AuthenticationError as e:
+        except AuthenticationError as e:
             error_msg = "OpenAI API authentication failed"
             log_openai_api_call(logger, model=self.model, success=False, error=str(e))
-            raise ValueError(error_msg)
+            raise ValueError(error_msg) from e
         
         except Exception as e:
             error_msg = f"OpenAI API error: {str(e)}"
             log_openai_api_call(logger, model=self.model, success=False, error=str(e))
-            raise ValueError(error_msg)
+            raise ValueError(error_msg) from e
 
 # Singleton instance
 _openai_service = None

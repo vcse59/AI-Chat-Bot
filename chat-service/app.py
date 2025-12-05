@@ -1,3 +1,4 @@
+# pylint: disable=logging-fstring-interpolation,broad-exception-caught
 # Load environment variables FIRST before any local imports
 from dotenv import load_dotenv
 from pathlib import Path

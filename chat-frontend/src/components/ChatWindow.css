@@ -1,15 +1,19 @@
+/* ============================================
+   ChatWindow Styles with Theme Support
+   ============================================ */
+
 .chat-window {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #f9f9f9;
+  background: var(--bg-tertiary);
   overflow: hidden;
 }
 
 .chat-window-header {
   padding: 15px 20px;
-  background-color: white;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -17,14 +21,15 @@
 
 .connection-status {
   font-size: 14px;
+  color: var(--text-primary);
 }
 
 .status-connected {
-  color: #4caf50;
+  color: var(--success);
 }
 
 .status-disconnected {
-  color: #f44336;
+  color: var(--error);
 }
 
 .messages-container {
@@ -44,33 +49,34 @@
 }
 
 .welcome-message {
-  color: #666;
+  color: var(--text-muted);
 }
 
 .welcome-message h2 {
   font-size: 28px;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .welcome-message p {
   font-size: 16px;
   margin: 8px 0;
+  color: var(--text-secondary);
 }
 
 .loading-messages {
   text-align: center;
   padding: 40px;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .error-message {
-  background-color: #fee;
-  color: #c33;
+  background-color: var(--error-bg);
+  color: var(--error);
   padding: 12px;
   margin: 20px;
-  border-radius: 5px;
-  border-left: 4px solid #c33;
+  border-radius: 8px;
+  border-left: 4px solid var(--error);
 }
 
 @media (max-width: 768px) {

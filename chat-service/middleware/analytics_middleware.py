@@ -136,3 +136,21 @@ async def track_message(message_id: str, conversation_id: str, user_id: str,
             )
     except Exception as e:
         logger.debug(f"Message tracking failed (non-critical): {e}")
+
+
+async def delete_user_analytics(username: str, auth_token: str):
+    """Delete user analytics data from analytics service"""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.delete(
+                f"{ANALYTICS_SERVICE_URL}/api/v1/analytics/users/{username}",
+                headers={"Authorization": f"Bearer {auth_token}"}
+            )
+            if response.status_code == 200:
+                logger.info(f"Analytics data deleted for user: {username}")
+            elif response.status_code == 404:
+                logger.debug(f"No analytics data found for user: {username}")
+            else:
+                logger.warning(f"Failed to delete analytics for user {username}: {response.status_code}")
+    except Exception as e:
+        logger.warning(f"Analytics deletion failed for user {username}: {e}")

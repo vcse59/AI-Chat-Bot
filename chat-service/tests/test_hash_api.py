@@ -1,6 +1,7 @@
 """
 Simple script to test user creation with the new hash-based system
 """
+# pylint: disable=broad-exception-caught
 import requests
 import json
 

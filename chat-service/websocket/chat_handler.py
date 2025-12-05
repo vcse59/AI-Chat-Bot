@@ -1,4 +1,5 @@
-from fastapi import WebSocket, WebSocketDisconnect, Depends
+# pylint: disable=logging-fstring-interpolation,broad-exception-caught
+from fastapi import WebSocket, WebSocketDisconnect
 from typing import Dict, List, Optional
 import json
 import logging
@@ -7,10 +8,10 @@ from engine.database import get_database
 from engine import schemas
 from engine import user_crud
 from services.openai_service import get_openai_service
-from utilities.logging_utils import log_websocket_event, log_security_event
-from utilities.response_utils import create_websocket_response, create_error_response
-from utilities.validation_utils import sanitize_string
-from utilities.datetime_utils import get_utc_now
+from utilities.logging_utils import log_websocket_event
+from utilities.response_utils import create_websocket_response
+from utilities.validation_utils import validate_message_content
+from utilities.datetime_utils import format_timestamp
 from middleware.analytics_middleware import track_conversation, track_message, sync_user_profile
 import asyncio
 import os

@@ -4,6 +4,7 @@ This maintains backward compatibility while using the new modular structure
 """
 
 # Import all CRUD operations from specialized modules
+# pylint: disable=unused-import
 from engine.user_crud import (
     get_user, get_user_by_email, get_user_by_username, get_users,
     create_user, update_user, delete_user, get_user_with_items,
@@ -22,6 +23,27 @@ from engine.conversation_crud import (
     delete_conversation, create_message, get_conversation_messages,
     get_message, delete_message, get_recent_messages, get_conversation_stats
 )
+# pylint: enable=unused-import
+
+# Define __all__ to explicitly export all re-exported functions
+__all__ = [
+    # User CRUD
+    "get_user", "get_user_by_email", "get_user_by_username", "get_users",
+    "create_user", "update_user", "delete_user", "get_user_with_items",
+    "search_users",
+    # Item CRUD
+    "get_item", "get_items", "get_available_items", "create_item",
+    "update_item", "delete_item", "search_items", "get_items_by_title",
+    "get_items_by_owner", "get_items_by_price_range",
+    # Conversation CRUD
+    "create_conversation", "get_conversation", "get_conversations",
+    "get_conversation_with_messages", "update_conversation", "end_conversation",
+    "delete_conversation", "create_message", "get_conversation_messages",
+    "get_message", "delete_message", "get_recent_messages", "get_conversation_stats",
+    # Category CRUD
+    "get_category", "get_category_by_name", "get_categories",
+    "create_category", "update_category", "delete_category",
+]
 
 # Category CRUD operations (keeping these here for now since they're simpler)
 from sqlalchemy.orm import Session

@@ -119,6 +119,75 @@ async def register_user(
     
     return {"message": "User registered successfully"}
 
+@router.post("/register-first-admin", response_model=schemas.UserResponse)
+async def register_first_admin(
+    user_data: schemas.UserCreate,
+    request: Request = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Public endpoint to create the first admin user.
+    Only works if no admin users exist in the system.
+    """
+    # Check if any admin user already exists
+    admin_role = db.query(Role).filter(Role.name == "admin").first()
+    if admin_role:
+        existing_admins = db.query(User).join(User.roles).filter(Role.name == "admin").first()
+        if existing_admins:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin user already exists. Use /auth/register-admin with admin credentials."
+            )
+    
+    # Check if user already exists
+    db_user = db.query(User).filter(User.username == user_data.username).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    
+    # Check if email already exists
+    if user_data.email:
+        existing_email = db.query(User).filter(User.email == user_data.email).first()
+        if existing_email:
+            raise HTTPException(status_code=400, detail="Email already registered")
+
+    # Create new admin user
+    hashed_password = get_password_hash(user_data.password)
+    db_user = User(
+        username=user_data.username,
+        email=user_data.email,
+        full_name=user_data.full_name,
+        hashed_password=hashed_password
+    )
+    
+    # Assign both "admin" and "user" roles
+    for role_name in ["admin", "user"]:
+        role = db.query(Role).filter(Role.name == role_name).first()
+        if role:
+            db_user.roles.append(role)
+    
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    
+    # Track registration activity
+    asyncio.create_task(_track_user_activity(
+        user_id=db_user.id,
+        username=db_user.username,
+        activity_type="register",
+        ip_address=request.client.host if request else None,
+        user_agent=request.headers.get("user-agent") if request else None
+    ))
+    
+    # Sync admin user profile with analytics
+    asyncio.create_task(_sync_user_profile(
+        user_id=db_user.id,
+        username=db_user.username,
+        role="admin",
+        email=db_user.email
+    ))
+    
+    return {"message": "First admin user created successfully"}
+
 @router.post("/register-admin", response_model=schemas.UserResponse)
 async def register_admin_user(
     user_data: schemas.UserCreate,

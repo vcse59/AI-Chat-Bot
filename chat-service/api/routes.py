@@ -1,15 +1,16 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+# pylint: disable=logging-fstring-interpolation,broad-exception-caught
+from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from engine.database import get_database
 from engine import schemas, crud
 from engine import mcp_server_crud
-from security import get_current_user, get_current_active_user, require_admin, CurrentUser
-from middleware.analytics_middleware import track_conversation, track_message, sync_user_profile, track_user_activity
+from security import get_current_active_user, require_admin, CurrentUser
+from middleware.analytics_middleware import (
+    track_conversation, track_message, sync_user_profile, delete_user_analytics
+)
 import asyncio
-import time
 import logging
-import httpx
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -140,7 +141,7 @@ async def create_user_conversation(
         raise HTTPException(status_code=403, detail="Access denied: Can only create conversations for yourself")
     
     # Set the user_id in the conversation data
-    conversation.user_id = user.id
+    conversation.user_id = str(user.id)
     created_conversation = crud.create_conversation(db=db, conversation=conversation)
     
     # Sync user profile with analytics (include role info from token if available)
@@ -149,10 +150,10 @@ async def create_user_conversation(
         user_role = "admin" if "admin" in current_user.roles else "user"
     
     asyncio.create_task(sync_user_profile(
-        user_id=user.id,
-        username=user.username,
+        user_id=str(user.id),
+        username=str(user.username),
         role=user_role,
-        email=user.email if hasattr(user, 'email') else None
+        email=str(user.email) if hasattr(user, 'email') and user.email is not None else None
     ))
     
     # Track conversation creation in analytics
@@ -195,7 +196,7 @@ async def get_user_conversations(
     if not current_user.is_admin() and current_user.username != user.username:
         raise HTTPException(status_code=403, detail="Access denied: Can only view your own conversations")
     
-    conversations = crud.get_conversations(db, skip=skip, limit=limit, user_id=user.id, status=status)
+    conversations = crud.get_conversations(db, skip=skip, limit=limit, user_id=str(user.id), status=status)
     return conversations
 
 # Reconnection endpoints
@@ -228,7 +229,7 @@ async def reconnect_to_conversation(
             raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
     
     # Update conversation status to active if it was ended
-    if conversation.status == schemas.ConversationStatus.ENDED:
+    if conversation.status.value == schemas.ConversationStatus.ENDED.value:
         conversation_update = schemas.ConversationUpdate(status=schemas.ConversationStatus.ACTIVE)
         conversation = crud.update_conversation(db, conversation_id=conversation_id, conversation=conversation_update)
     
@@ -401,7 +402,7 @@ async def get_user_conversation_stats(
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
-    if conversation.user_id != user_id:
+    if str(conversation.user_id) != str(user_id):
         raise HTTPException(status_code=403, detail="Access denied: You don't own this conversation")
     
     stats = crud.get_conversation_stats(db, conversation_id=conversation_id)
@@ -447,6 +448,51 @@ async def delete_conversation_admin(
     ))
     
     return {"message": "Conversation deleted successfully by admin", "conversation_id": conversation_id}
+
+
+@router.delete("/admin/users/{username}", tags=["admin"])
+async def delete_user_admin(
+    username: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(require_admin)
+):
+    """Delete a user and all their data (Admin only)
+    
+    This endpoint deletes:
+    - User record from chat database
+    - All user's conversations and messages
+    - User's MCP server configurations
+    - User's analytics data
+    """
+    # Find user by username
+    user = crud.get_user_by_username(db, username)
+    if not user:
+        raise HTTPException(status_code=404, detail=f"User '{username}' not found")
+    
+    user_id = str(user.id)
+    
+    # Delete all user's conversations first (cascade will handle messages)
+    conversations = crud.get_conversations(db, user_id=user_id, limit=10000)
+    for conv in conversations:
+        crud.delete_conversation(db, conversation_id=str(conv.id))
+    
+    # Delete user's MCP servers
+    mcp_servers = mcp_server_crud.get_user_mcp_servers(db, user_id=user_id)
+    for server in mcp_servers:
+        mcp_server_crud.delete_mcp_server(db, server_id=str(server.id))
+    
+    # Delete the user from chat database
+    success = crud.delete_user(db, user_id=user_id)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete user")
+    
+    # Delete user's analytics data (async, non-blocking)
+    auth_header = request.headers.get("Authorization", "")
+    auth_token = auth_header.replace("Bearer ", "") if auth_header.startswith("Bearer ") else ""
+    asyncio.create_task(delete_user_analytics(username, auth_token))
+    
+    return {"message": f"User '{username}' and all associated data deleted successfully"}
 
 
 # ============================================================================

@@ -132,9 +132,38 @@ async def update_user(
         user.hashed_password = get_password_hash(user_update.password)
     if user_update.is_active is not None and is_admin:  # Only admin can change active status
         user.is_active = user_update.is_active
+    if user_update.theme_preference is not None:
+        user.theme_preference = user_update.theme_preference
     
     db.commit()
     return {"message": "User updated successfully"}
+
+@router.put("/me/theme", response_model=schemas.UserResponse)
+async def update_my_theme(
+    theme_update: schemas.ThemeUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update the current user's theme preference."""
+    # Validate theme value
+    if theme_update.theme_preference not in ["dark", "light"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Theme must be 'dark' or 'light'"
+        )
+    
+    user = db.query(User).filter(User.username == current_user.username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.theme_preference = theme_update.theme_preference
+    db.commit()
+    return {"message": "Theme updated successfully"}
+
+@router.get("/me/theme")
+async def get_my_theme(current_user: User = Depends(get_current_user)):
+    """Get the current user's theme preference."""
+    return {"theme_preference": current_user.theme_preference}
 
 @router.delete("/{username}", response_model=schemas.UserResponse)
 async def delete_user(

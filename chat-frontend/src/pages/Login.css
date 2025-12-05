@@ -1,43 +1,88 @@
+/* ============================================
+   Login Page - Theme Agnostic Professional Design
+   ============================================ */
+
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f2847 50%, #0a1929 100%);
   padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative background elements */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(74, 144, 217, 0.1) 0%, transparent 50%);
+  animation: pulse 15s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.3; }
 }
 
 .login-card {
-  background: white;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 48px 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  position: relative;
+  z-index: 1;
 }
 
-.login-title {
-  text-align: center;
-  color: #333;
-  margin-bottom: 10px;
-  font-size: 28px;
+/* Logo Styling */
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.logo-icon {
+  font-size: 40px;
+  filter: drop-shadow(0 4px 8px rgba(74, 144, 217, 0.4));
+}
+
+.logo-text {
+  font-size: 36px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4a90d9 0%, #667eea 50%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
 }
 
 .login-subtitle {
   text-align: center;
-  color: #666;
-  margin-bottom: 30px;
-  font-size: 20px;
-  font-weight: normal;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 32px;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 .error-message {
-  background-color: #fee;
-  color: #c33;
-  padding: 12px;
-  border-radius: 5px;
+  background: rgba(220, 53, 69, 0.15);
+  color: #ff6b7a;
+  padding: 14px 16px;
+  border-radius: 10px;
   margin-bottom: 20px;
-  border-left: 4px solid #c33;
+  border: 1px solid rgba(220, 53, 69, 0.25);
+  font-size: 14px;
 }
 
 .login-form {
@@ -46,51 +91,63 @@
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #333;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
+  font-size: 14px;
 }
 
 .form-group input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
   font-size: 16px;
-  transition: border-color 0.3s;
+  transition: all 0.3s ease;
   box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #4a90d9;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.15);
 }
 
 .form-group input:disabled {
-  background-color: #f5f5f5;
+  background: rgba(255, 255, 255, 0.03);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .login-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a90d9 0%, #667eea 100%);
   color: white;
-  padding: 14px;
+  padding: 16px;
   border: none;
-  border-radius: 5px;
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  text-transform: none;
+  letter-spacing: 0.3px;
 }
 
 .login-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 12px 28px rgba(74, 144, 217, 0.4);
 }
 
 .login-button:active:not(:disabled) {
@@ -104,16 +161,19 @@
 
 .register-link {
   text-align: center;
-  margin-top: 20px;
-  color: #666;
+  margin-top: 28px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
 }
 
 .register-link a {
-  color: #667eea;
+  color: #4a90d9;
   text-decoration: none;
   font-weight: 600;
+  transition: color 0.2s;
 }
 
 .register-link a:hover {
+  color: #667eea;
   text-decoration: underline;
 }

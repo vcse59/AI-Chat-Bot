@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { VERSION } from '../config/version';
 import analyticsService from '../services/analyticsService';
 import chatService from '../services/chatService';
 import authService from '../services/authService';
@@ -10,6 +12,7 @@ import './AnalyticsDashboard.css';
 const AnalyticsDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [initialLoading, setInitialLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -134,16 +137,52 @@ const AnalyticsDashboard = () => {
   const loadEnhancedMetrics = async (showLoading = false) => {
     try {
       if (showLoading) setLoading(true);
-      const [roleData, userData, conversationsData, tokenData, responseData] = await Promise.all([
+      const [roleData, analyticsUserData, conversationsData, tokenData, responseData, authUsersData] = await Promise.all([
         analyticsService.getMetricsByRole(),
         analyticsService.getUsersDetailedMetrics(null, 50),
         analyticsService.getConversationMetrics({ limit: 100 }),
         analyticsService.getTokenUsageByConversation(null, 50),
         analyticsService.getResponseTimesByUser(50),
+        authService.getAllUsers().catch(() => ({ users: [] })), // Fallback if auth service fails
       ]);
 
+      // Merge auth users with analytics data
+      // Create a map of analytics users by username for quick lookup
+      const analyticsUserMap = new Map();
+      analyticsUserData.forEach(user => {
+        analyticsUserMap.set(user.username, user);
+      });
+
+      // Create merged user list - include all auth users with analytics data where available
+      const authUsers = authUsersData.users || [];
+      const mergedUsers = authUsers.map(authUser => {
+        const analyticsData = analyticsUserMap.get(authUser.username);
+        if (analyticsData) {
+          // User has analytics data, use it but ensure username matches
+          return { ...analyticsData, role: authUser.roles?.[0] || analyticsData.role };
+        } else {
+          // User has no analytics data, create placeholder
+          return {
+            user_id: authUser.id || authUser.username,
+            username: authUser.username,
+            role: authUser.roles?.[0] || 'user',
+            total_conversations: 0,
+            total_messages: 0,
+            total_tokens: 0,
+            avg_response_time: 0,
+          };
+        }
+      });
+
+      // Also include any analytics users not in auth (shouldn't happen normally)
+      analyticsUserData.forEach(analyticsUser => {
+        if (!authUsers.find(au => au.username === analyticsUser.username)) {
+          mergedUsers.push(analyticsUser);
+        }
+      });
+
       setMetricsByRole(roleData);
-      setUserMetrics(userData);
+      setUserMetrics(mergedUsers);
       setAllConversations(conversationsData);
       setTokenUsage(tokenData);
       setResponseTimes(responseData);
@@ -301,12 +340,34 @@ const AnalyticsDashboard = () => {
   };
 
   const handleDeleteUser = async (username) => {
-    if (!window.confirm(`Are you sure you want to permanently delete user "${username}"? This action cannot be undone and will remove all associated data.`)) {
+    // Prevent deleting the default admin
+    if (username === 'admin') {
+      alert('Cannot delete the default admin user.');
+      return;
+    }
+
+    // Prevent self-deletion
+    if (username === user?.username) {
+      alert('You cannot delete your own account.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to permanently delete user "${username}"?\n\nThis will permanently remove:\n• User account from auth system\n• All conversations and messages\n• All analytics data\n\nThis action cannot be undone.`)) {
       return;
     }
 
     try {
       setDeletingUserId(username);
+      
+      // Step 1: Delete from chat-service (includes conversations, messages, MCP servers, and analytics)
+      try {
+        await chatService.deleteUserAdmin(username);
+      } catch (err) {
+        // User might not exist in chat database, continue with auth deletion
+        console.log('Chat service deletion:', err.message);
+      }
+
+      // Step 2: Delete from auth-service (the primary user account)
       await authService.deleteUser(username);
       
       // Update local state without full page reload
@@ -323,14 +384,14 @@ const AnalyticsDashboard = () => {
         detail: { username }
       }));
       
-      alert(`User "${username}" has been successfully deleted.`);
+      alert(`User "${username}" has been successfully deleted from all systems.`);
     } catch (err) {
       console.error('Failed to delete user:', err);
       let errorMessage = err.message;
       
       // Provide more helpful error messages
       if (errorMessage.includes('User not found') || errorMessage.includes('404')) {
-        errorMessage = `User "${username}" not found in authentication system. This user may only exist in analytics data but doesn't have an active account.`;
+        errorMessage = `User "${username}" not found in auth system. The user may have already been deleted.`;
       }
       
       alert(`Failed to delete user: ${errorMessage}`);
@@ -379,6 +440,11 @@ const AnalyticsDashboard = () => {
     return (
       <div className="analytics-dashboard">
         <div className="analytics-header">
+          <div className="header-logo">
+            <span className="logo-icon">💬</span>
+            <span className="logo-text">ConvoAI</span>
+            <span className="version-badge">v{VERSION}</span>
+          </div>
           <h1>📊 Analytics Dashboard</h1>
           <p>Loading analytics data...</p>
         </div>
@@ -394,6 +460,11 @@ const AnalyticsDashboard = () => {
     return (
       <div className="analytics-dashboard">
         <div className="analytics-header">
+          <div className="header-logo">
+            <span className="logo-icon">💬</span>
+            <span className="logo-text">ConvoAI</span>
+            <span className="version-badge">v{VERSION}</span>
+          </div>
           <h1>📊 Analytics Dashboard</h1>
           <p>Admin-only analytics and metrics</p>
         </div>
@@ -413,9 +484,17 @@ const AnalyticsDashboard = () => {
           <button onClick={handleBackToChat} className="back-button">
             ← Back to Chat
           </button>
+          <div className="header-logo">
+            <span className="logo-icon">💬</span>
+            <span className="logo-text">ConvoAI</span>
+            <span className="version-badge">v{VERSION}</span>
+          </div>
           <h1>📊 Analytics Dashboard</h1>
         </div>
         <div className="header-right">
+          <button onClick={toggleTheme} className="theme-toggle-btn" title={`Switch to ${isDark ? 'light' : 'dark'} mode`}>
+            {isDark ? '☀️ Light' : '🌙 Dark'}
+          </button>
           <span className="username">👤 {user?.username}</span>
           <button onClick={handleLogout} className="logout-button">
             Logout
@@ -929,8 +1008,8 @@ const AnalyticsDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredUserMetrics.map((userData, index) => (
-                  <tr key={index}>
+                {filteredUserMetrics.map((userData) => (
+                  <tr key={userData.user_id}>
                     <td><strong>{userData.username}</strong></td>
                     <td>{userData.role || 'N/A'}</td>
                     <td>{userData.total_conversations}</td>
@@ -944,13 +1023,6 @@ const AnalyticsDashboard = () => {
                       >
                         View Conversations
                       </button>
-                      <button 
-                        className="delete-user-btn"
-                        onClick={() => handleDeleteUser(userData.username)}
-                        disabled={deletingUserId === userData.username}
-                      >
-                        {deletingUserId === userData.username ? 'Deleting...' : 'Delete'}
-                      </button>
                     </td>
                   </tr>
                 ))}
@@ -961,35 +1033,42 @@ const AnalyticsDashboard = () => {
       )}
 
       {/* User Conversations Modal */}
-      {selectedUser && userConversations.length > 0 && (
+      {selectedUser && (
         <div className="modal-overlay" onClick={() => setSelectedUser(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>User Conversations</h3>
             <button className="modal-close" onClick={() => setSelectedUser(null)}>✕</button>
-            <div className="conversations-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Conversation ID</th>
-                    <th>Messages</th>
-                    <th>Tokens</th>
-                    <th>Avg Response</th>
-                    <th>Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {userConversations.map((conv, index) => (
-                    <tr key={index}>
-                      <td>{conv.conversation_id.substring(0, 8)}...</td>
-                      <td>{conv.message_count}</td>
-                      <td>{conv.total_tokens}</td>
-                      <td>{conv.avg_response_time.toFixed(4)}s</td>
-                      <td>{new Date(conv.created_at).toLocaleDateString()}</td>
+            {userConversations.length > 0 ? (
+              <div className="conversations-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Conversation ID</th>
+                      <th>Messages</th>
+                      <th>Tokens</th>
+                      <th>Avg Response</th>
+                      <th>Created</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {userConversations.map((conv) => (
+                      <tr key={conv.conversation_id}>
+                        <td>{conv.conversation_id.substring(0, 8)}...</td>
+                        <td>{conv.message_count}</td>
+                        <td>{conv.total_tokens}</td>
+                        <td>{conv.avg_response_time.toFixed(4)}s</td>
+                        <td>{new Date(conv.created_at).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="empty-state">
+                <div className="empty-state-icon">💬</div>
+                <div className="empty-state-text">No conversations found for this user</div>
+              </div>
+            )}
           </div>
         </div>
       )}

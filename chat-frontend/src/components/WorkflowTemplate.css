@@ -1,0 +1,91 @@
+/* ============================================
+   WorkflowTemplate Styles with Theme Support
+   ============================================ */
+
+.workflow-template {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  padding: 2rem;
+  max-width: 480px;
+  margin: 2rem auto;
+  border: 1px solid var(--border-primary);
+  backdrop-filter: blur(10px);
+}
+
+.workflow-template h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.workflow-template ul {
+  list-style: none;
+  padding: 0;
+}
+
+.workflow-template li {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+.workflow-template li:hover {
+  background: var(--bg-hover);
+}
+
+.workflow-template li.selected {
+  background: var(--accent-bg);
+  border-color: var(--accent-primary);
+}
+
+.workflow-template .custom-prompt {
+  margin: 1rem 0;
+}
+
+.workflow-template .custom-prompt label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.workflow-template .custom-prompt input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-secondary);
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.workflow-template .custom-prompt input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.workflow-template .custom-prompt input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.workflow-template .create-btn {
+  background: var(--accent-gradient);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+}
+
+.workflow-template .create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.4);
+}

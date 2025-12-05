@@ -4,7 +4,8 @@ from .user import (
     UserUpdate,
     UserInDB,
     UserResponse,
-    UserList
+    UserList,
+    ThemeUpdate
 )
 from .role import UpdateUserRoles
 
@@ -15,5 +16,6 @@ __all__ = [
     'UserInDB',
     'UserResponse',
     'UserList',
-    'UpdateUserRoles'
+    'UpdateUserRoles',
+    'ThemeUpdate'
 ]

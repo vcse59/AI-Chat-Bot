@@ -68,10 +68,20 @@ class AnalyticsService:
         if user_id:
             query = query.filter(UserProfile.user_id == user_id)
         
-        users = query.limit(limit).all()
+        # Order by most recent activity and deduplicate by user_id
+        users = query.order_by(UserProfile.updated_at.desc()).limit(limit).all()
+        
+        # Deduplicate by user_id (keep the most recent entry)
+        seen_user_ids = set()
+        unique_users = []
+        for user in users:
+            if user.user_id not in seen_user_ids:
+                seen_user_ids.add(user.user_id)
+                unique_users.append(user)
+        
         results = []
         
-        for user in users:
+        for user in unique_users:
             # Get conversation count
             conv_count = db.query(func.count(func.distinct(ConversationMetrics.conversation_id))).filter(
                 ConversationMetrics.user_id == user.user_id

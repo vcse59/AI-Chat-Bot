@@ -1,6 +1,10 @@
+/* ============================================
+   MessageInput Styles with Theme Support
+   ============================================ */
+
 .message-input-container {
-  background-color: white;
-  border-top: 1px solid #e0e0e0;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-primary);
   padding: 15px 20px;
 }
 
@@ -13,7 +17,7 @@
 .message-input {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-secondary);
   border-radius: 20px;
   font-size: 16px;
   font-family: inherit;
@@ -21,21 +25,29 @@
   max-height: 120px;
   min-height: 44px;
   overflow-y: auto;
-  transition: border-color 0.3s;
+  transition: all 0.3s;
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.message-input::placeholder {
+  color: var(--text-placeholder);
 }
 
 .message-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus);
 }
 
 .message-input:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--bg-input-disabled);
   cursor: not-allowed;
+  color: var(--text-muted);
 }
 
 .send-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   color: white;
   border: none;
   border-radius: 50%;
@@ -52,7 +64,7 @@
 
 .send-button:hover:not(:disabled) {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.4);
 }
 
 .send-button:active:not(:disabled) {
@@ -62,7 +74,7 @@
 .send-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: #ccc;
+  background: var(--bg-hover);
 }
 
 @media (max-width: 768px) {

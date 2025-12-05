@@ -2,35 +2,34 @@
 
 Welcome to the ConvoAI documentation hub. This directory contains all comprehensive guides, implementation details, and reference materials for the ConvoAI platform.
 
+**Current Version:** 3.0.0
+
 ## 📚 Documentation Index
 
 ### Getting Started
+- **[Quick Start (Docker)](./QUICK_START.md)** - Quick start with Docker deployment
 - **[Quick Start Local Development](./QUICK_START_LOCAL.md)** - Complete guide for setting up ConvoAI on your local machine
 - **[Startup Guide](./STARTUP_GUIDE.md)** - Automated setup instructions and service management
-- **[Admin Quick Start](./ADMIN_QUICK_START.md)** - Quick guide for administrators
+
+### Admin & User Management
+- **[How to Create Admin](./HOW_TO_CREATE_ADMIN.md)** - Complete admin user creation guide (3 methods)
+- **[User Deletion Feature](./USER_DELETION_FEATURE.md)** - User management and deletion functionality
 
 ### Feature Documentation
-- **[Analytics Implementation](./ANALYTICS_IMPLEMENTATION.md)** - Complete analytics system architecture and implementation
 - **[Analytics Guide](./ANALYTICS_GUIDE.md)** - Using the analytics dashboard and tracking features
-- **[Analytics Dashboard Complete](./ANALYTICS_DASHBOARD_COMPLETE.md)** - Comprehensive analytics dashboard documentation
+- **[Analytics Implementation](./ANALYTICS_IMPLEMENTATION.md)** - Complete analytics system architecture
 - **[Testing Analytics](./TESTING_ANALYTICS.md)** - Testing guide for analytics features
+- **[MCP Quick Start](./MCP_QUICKSTART.md)** - Model Context Protocol setup and usage
+- **[MCP Server Management](./MCP_SERVER_MANAGEMENT.md)** - Managing MCP servers
 
 ### Configuration & Setup
 - **[Environment Configuration](./ENV_CONFIGURATION.md)** - Environment variables and configuration guide
 - **[Database Migration](./DATABASE_MIGRATION.md)** - Database setup and migration instructions
-- **[First Admin Setup](./FIRST_ADMIN_SETUP.md)** - Creating your first admin user
-- **[How to Create Admin](./HOW_TO_CREATE_ADMIN.md)** - Admin user management guide
 
 ### Reference & Maintenance
-- **[Changelog](./CHANGELOG.md)** - Complete version history and release notes
 - **[Versioning](./VERSIONING.md)** - Version management and release process
-- **[Project Cleanup Summary](./PROJECT_CLEANUP_SUMMARY.md)** - Project organization and cleanup documentation
-- **[Deployment Status](./DEPLOYMENT_STATUS.md)** - Current deployment status and configuration
 
-### Features & Capabilities
-- **[User Deletion Feature](./USER_DELETION_FEATURE.md)** - User management and deletion functionality
-
-### Publication
+### Architecture & Design
 - **[Building Production-Ready AI ChatBot Platform](./Building-Production-Ready-AI-ChatBot-Platform.md)** - Comprehensive article about the ConvoAI platform architecture and implementation
 
 ## 🗂️ Documentation Organization
@@ -42,53 +41,46 @@ Welcome to the ConvoAI documentation hub. This directory contains all comprehens
 - [Analytics Implementation](./ANALYTICS_IMPLEMENTATION.md)
 - [Database Migration](./DATABASE_MIGRATION.md)
 - [Environment Configuration](./ENV_CONFIGURATION.md)
+- [MCP Quick Start](./MCP_QUICKSTART.md)
 
 **For Administrators:**
-- [Admin Quick Start](./ADMIN_QUICK_START.md)
-- [First Admin Setup](./FIRST_ADMIN_SETUP.md)
 - [How to Create Admin](./HOW_TO_CREATE_ADMIN.md)
 - [User Deletion Feature](./USER_DELETION_FEATURE.md)
+- [Analytics Guide](./ANALYTICS_GUIDE.md)
 
 **For Users:**
 - [Startup Guide](./STARTUP_GUIDE.md)
-- [Analytics Guide](./ANALYTICS_GUIDE.md)
+- [Quick Start](./QUICK_START.md)
 
 **For Contributors:**
-- [Changelog](./CHANGELOG.md)
 - [Versioning](./VERSIONING.md)
-- [Project Cleanup Summary](./PROJECT_CLEANUP_SUMMARY.md)
 
 ### By Topic
 
 **Setup & Configuration:**
+- Quick Start
 - Quick Start Local Development
 - Startup Guide
 - Environment Configuration
 - Database Migration
-- First Admin Setup
 
 **Analytics:**
-- Analytics Implementation
 - Analytics Guide
-- Analytics Dashboard Complete
+- Analytics Implementation
 - Testing Analytics
 
+**MCP (Model Context Protocol):**
+- MCP Quick Start
+- MCP Server Management
+
 **User Management:**
-- Admin Quick Start
 - How to Create Admin
 - User Deletion Feature
-
-**Maintenance:**
-- Changelog
-- Versioning
-- Deployment Status
-- Project Cleanup Summary
 
 ## 📖 Quick Links
 
 - [Main Project README](../README.md) - Start here for project overview
 - [Scripts Documentation](../scripts/README.md) - Platform-specific management scripts
-- [Utility Scripts](../utils/README.md) - Database utilities and standalone test scripts
 - [Tests Documentation](../tests/README.md) - Testing suite documentation
 
 ## 🔍 Finding What You Need
@@ -102,16 +94,13 @@ Welcome to the ConvoAI documentation hub. This directory contains all comprehens
 → Read [Analytics Implementation](./ANALYTICS_IMPLEMENTATION.md) and [Analytics Guide](./ANALYTICS_GUIDE.md)
 
 **Create an admin user:**
-→ Follow [First Admin Setup](./FIRST_ADMIN_SETUP.md) or [How to Create Admin](./HOW_TO_CREATE_ADMIN.md)
+→ Follow [How to Create Admin](./HOW_TO_CREATE_ADMIN.md)
 
 **Configure environment variables:**
 → See [Environment Configuration](./ENV_CONFIGURATION.md)
 
-**Learn about recent changes:**
-→ Check [Changelog](./CHANGELOG.md)
-
-**Deploy to production:**
-→ Review [Deployment Status](./DEPLOYMENT_STATUS.md) and [Environment Configuration](./ENV_CONFIGURATION.md)
+**Set up MCP servers:**
+→ Read [MCP Quick Start](./MCP_QUICKSTART.md) and [MCP Server Management](./MCP_SERVER_MANAGEMENT.md)
 
 **Understand the architecture:**
 → Read [Building Production-Ready AI ChatBot Platform](./Building-Production-Ready-AI-ChatBot-Platform.md)
@@ -131,10 +120,11 @@ When adding new documentation:
 If you can't find what you're looking for:
 
 1. Check the [Main README](../README.md) for general information
-2. Review the [Changelog](./CHANGELOG.md) for recent updates
+2. Check the [CHANGELOG](../CHANGELOG.md) for recent updates
 3. Look through related service READMEs in their respective directories
 4. Open an issue on GitHub for questions
 
 ---
 
-**Documentation Last Updated:** November 16, 2025
+**Documentation Last Updated:** December 5, 2025  
+**Version:** 3.0.0

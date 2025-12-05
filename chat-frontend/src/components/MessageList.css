@@ -1,3 +1,7 @@
+/* ============================================
+   MessageList Styles with Theme Support
+   ============================================ */
+
 .message-list {
   display: flex;
   flex-direction: column;
@@ -24,16 +28,16 @@
 
 .message-user {
   align-self: flex-end;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--message-user-bg);
+  color: var(--message-user-text);
   margin-left: auto;
 }
 
 .message-assistant {
   align-self: flex-start;
-  background-color: white;
-  color: #333;
-  border: 1px solid #e0e0e0;
+  background-color: var(--message-assistant-bg);
+  color: var(--message-assistant-text);
+  border: 1px solid var(--message-assistant-border);
   margin-right: auto;
 }
 
@@ -50,7 +54,7 @@
 }
 
 .message-assistant .message-header {
-  color: #666;
+  color: var(--text-muted);
 }
 
 .message-role {
@@ -72,7 +76,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #999;
+  color: var(--text-muted);
   font-size: 16px;
 }
 

@@ -17,10 +17,13 @@ from .routers import auth, users, roles
 from .models.role import Role
 from .models.user import User
 from .security.auth import get_password_hash
-from .database import engine, SessionLocal, Base
+from .database import engine, SessionLocal, Base, run_all_migrations
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+
+# Run database migrations for existing databases
+run_all_migrations()
 
 # Initialize default roles
 def init_roles():

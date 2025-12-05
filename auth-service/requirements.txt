@@ -1,0 +1,11 @@
+# Auth Service Requirements
+# Install with: pip install -r requirements.txt
+
+fastapi>=0.121.1
+uvicorn>=0.38.0
+python-jose[cryptography]>=3.5.0
+bcrypt>=4.0.1
+python-multipart>=0.0.20
+sqlalchemy>=2.0.44
+passlib[bcrypt]>=1.7.4
+python-dotenv>=1.0.0

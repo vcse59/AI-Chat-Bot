@@ -1,0 +1,103 @@
+.workflow-page-bg {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: 0;
+}
+
+.workflow-page-header {
+  text-align: center;
+  padding: 2rem 0 1rem 0;
+  color: var(--text-primary);
+  position: relative;
+}
+
+/* Header Logo Styling */
+.workflow-page-header .header-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.workflow-page-header .header-logo .logo-icon {
+  font-size: 32px;
+  filter: drop-shadow(0 2px 4px rgba(74, 144, 217, 0.3));
+}
+
+.workflow-page-header .header-logo .logo-text {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4a90d9 0%, #667eea 50%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+/* Theme Toggle Button */
+.workflow-page-header .theme-toggle-btn {
+  position: absolute;
+  right: 2rem;
+  top: 2rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.workflow-page-header .theme-toggle-btn:hover {
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.back-to-chat-button {
+  position: absolute;
+  left: 2rem;
+  top: 2rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.back-to-chat-button:hover {
+  background: var(--bg-hover);
+}
+
+.workflow-page-header h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.workflow-page-desc {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.workflow-status {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+.workflow-status.success {
+  color: var(--success);
+}
+.workflow-status.error {
+  color: var(--error);
+}

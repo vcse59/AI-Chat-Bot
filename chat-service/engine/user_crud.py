@@ -6,11 +6,11 @@ from typing import List, Optional
 from engine import models, schemas
 from utilities.database_utils import (
     get_entity_by_id, get_entity_by_field, get_entities_paginated,
-    create_entity, update_entity, delete_entity, exists_by_field
+    update_entity, delete_entity, exists_by_field
 )
 from utilities.validation_utils import is_valid_email, validate_username
 from utilities.logging_utils import log_database_operation
-from utilities.hash_utils import generate_user_hash, validate_user_hash
+from utilities.hash_utils import generate_user_hash
 import logging
 
 logger = logging.getLogger(__name__)

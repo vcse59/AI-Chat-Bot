@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { VERSION } from '../config/version';
 import './Register.css';
 
 const Register = () => {
@@ -66,8 +67,11 @@ const Register = () => {
   return (
     <div className="register-container">
       <div className="register-card">
-        <h1 className="register-title">Chat Application</h1>
-        <h2 className="register-subtitle">Create Account</h2>
+        <div className="register-logo">
+          <span className="logo-icon">💬</span>
+          <span className="logo-text">ConvoAI</span>
+        </div>
+        <h2 className="register-subtitle">Create your account</h2>
         
         {error && <div className="error-message">{error}</div>}
         
@@ -149,6 +153,8 @@ const Register = () => {
         <p className="login-link">
           Already have an account? <Link to="/login">Sign in here</Link>
         </p>
+        
+        <div className="version-badge">v{VERSION}</div>
       </div>
     </div>
   );

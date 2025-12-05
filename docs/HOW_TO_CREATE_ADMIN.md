@@ -7,7 +7,20 @@ You can now create admin accounts directly from the chat application UI! This gu
 
 Since you need an admin to create more admins, here's how to create your **first admin account**:
 
-### Option A: Direct Database Update (One-Time Setup)
+### Option A: Automated Script (Easiest - Recommended)
+
+Use the bootstrap scripts for a quick one-command setup:
+
+```bash
+# Windows PowerShell:
+.\scripts\windows\bootstrap-admin.bat
+
+# Linux/Mac:
+chmod +x scripts/linux-mac/bootstrap-admin.sh
+./scripts/linux-mac/bootstrap-admin.sh
+```
+
+### Option B: Direct Database Update (Manual Setup)
 
 1. **Create a regular user first:**
    - Go to http://localhost:3000/register
@@ -338,12 +351,12 @@ docker logs auth-server --tail 50
 ---
 
 ## 📚 Related Documentation
-- **Full Setup Guide**: `ANALYTICS_DASHBOARD_COMPLETE.md`
-- **Testing Guide**: `TESTING_ANALYTICS.md`
+- **Analytics Guide**: `ANALYTICS_GUIDE.md`
+- **Testing Analytics**: `TESTING_ANALYTICS.md`
 - **Quick Start**: `QUICK_START.md`
-- **Deployment Status**: `DEPLOYMENT_STATUS.md`
+- **MCP Server Management**: `MCP_SERVER_MANAGEMENT.md`
 
 ---
 
-**Last Updated**: November 15, 2024
-**Version**: 1.0.0
+**Last Updated**: December 5, 2025  
+**Version**: 3.0.0

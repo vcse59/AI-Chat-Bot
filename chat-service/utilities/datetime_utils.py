@@ -2,7 +2,7 @@
 Date and time utility functions
 """
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Union
+from typing import Optional
 import pytz
 
 def get_utc_now() -> datetime:
@@ -22,6 +22,21 @@ def get_utc_timestamp() -> float:
         Current UTC timestamp as float
     """
     return datetime.utcnow().timestamp()
+
+def format_timestamp(dt: Optional[datetime] = None, format_string: str = "%Y-%m-%dT%H:%M:%S.%fZ") -> str:
+    """
+    Format datetime to ISO timestamp string
+    
+    Args:
+        dt: Datetime object to format (defaults to current UTC time)
+        format_string: Format string (default ISO format with microseconds)
+        
+    Returns:
+        Formatted timestamp string
+    """
+    if dt is None:
+        dt = get_utc_now()
+    return dt.strftime(format_string)
 
 def format_datetime(
     dt: datetime, 

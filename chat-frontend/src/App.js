@@ -1,12 +1,16 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import RegisterAdmin from './pages/RegisterAdmin';
 import ChatPage from './pages/ChatPage';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import WorkflowTemplates from './pages/WorkflowTemplates';
+import UserManagement from './pages/UserManagement';
 import AdminRoute from './components/AdminRoute';
+import './styles/theme.css';
 import './App.css';
 
 // Protected Route Component
@@ -44,9 +48,10 @@ const PublicRoute = ({ children }) => {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <div className="app">
-          <Routes>
+      <ThemeProvider>
+        <AuthProvider>
+          <div className="app">
+            <Routes>
             {/* Public routes */}
             <Route
               path="/login"
@@ -85,10 +90,26 @@ function App() {
               }
             />
             <Route
+              path="/workflows"
+              element={
+                <ProtectedRoute>
+                  <WorkflowTemplates />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/register-admin"
               element={
                 <AdminRoute>
                   <RegisterAdmin />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/user-management"
+              element={
+                <AdminRoute>
+                  <UserManagement />
                 </AdminRoute>
               }
             />
@@ -99,6 +120,7 @@ function App() {
           </Routes>
         </div>
       </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

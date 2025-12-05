@@ -2,12 +2,13 @@
 
 ## ✅ Completed Steps
 
-1. **Git Tags Created**: v1.0.0, v1.1.0, v2.0.0
+1. **Git Tags Created**: v1.0.0, v1.1.0, v2.0.0, v3.0.0
 2. **Tags Pushed to GitHub**: All tags are now on remote repository
 3. **Release Notes Generated**: 
    - `RELEASE_NOTES_v1.0.0.md`
    - `RELEASE_NOTES_v1.1.0.md`
    - `RELEASE_NOTES_v2.0.0.md`
+   - `RELEASE_NOTES_v3.0.0.md`
 
 ## 🎯 Next Step: Create Releases on GitHub
 
@@ -36,6 +37,13 @@
 2. **Choose tag**: `v2.0.0`
 3. **Title**: `v2.0.0 - MCP Integration (Major Feature Release)`
 4. **Description**: Copy from `RELEASE_NOTES_v2.0.0.md`
+5. Click **Publish release**
+
+#### For v3.0.0:
+1. Go to: https://github.com/vcse59/ConvoAI/releases/new
+2. **Choose tag**: `v3.0.0`
+3. **Title**: `v3.0.0 - Theme Toggle, Cross-Platform Support & Documentation Enhancement`
+4. **Description**: Copy from `RELEASE_NOTES_v3.0.0.md`
 5. ✅ Check **Set as the latest release**
 6. Click **Publish release**
 
@@ -78,7 +86,8 @@ gh auth login
 # Create releases
 gh release create v1.0.0 --title "v1.0.0 - Initial Production Release" --notes-file RELEASE_NOTES_v1.0.0.md
 gh release create v1.1.0 --title "v1.1.0 - Analytics Service Integration" --notes-file RELEASE_NOTES_v1.1.0.md
-gh release create v2.0.0 --title "v2.0.0 - MCP Integration (Major Feature Release)" --notes-file RELEASE_NOTES_v2.0.0.md --latest
+gh release create v2.0.0 --title "v2.0.0 - MCP Integration (Major Feature Release)" --notes-file RELEASE_NOTES_v2.0.0.md
+gh release create v3.0.0 --title "v3.0.0 - Theme Toggle, Cross-Platform Support & Documentation Enhancement" --notes-file RELEASE_NOTES_v3.0.0.md --latest
 ```
 
 ---
@@ -90,6 +99,7 @@ gh release create v2.0.0 --title "v2.0.0 - MCP Integration (Major Feature Releas
 | `RELEASE_NOTES_v1.0.0.md` | Detailed release notes for v1.0.0 |
 | `RELEASE_NOTES_v1.1.0.md` | Detailed release notes for v1.1.0 |
 | `RELEASE_NOTES_v2.0.0.md` | Detailed release notes for v2.0.0 |
+| `RELEASE_NOTES_v3.0.0.md` | Detailed release notes for v3.0.0 |
 | `GITHUB_RELEASES_GUIDE.md` | Complete guide for creating releases |
 | `create_releases.ps1` | PowerShell automation script |
 | `create_releases.bat` | Windows batch file wrapper |
@@ -103,7 +113,8 @@ After creating releases, verify at:
 **https://github.com/vcse59/ConvoAI/releases**
 
 You should see:
-- 🏷️ **v2.0.0** - MCP Integration (Latest)
+- 🏷️ **v3.0.0** - Theme Toggle, Cross-Platform Support & Documentation Enhancement (Latest)
+- 🏷️ **v2.0.0** - MCP Integration
 - 🏷️ **v1.1.0** - Analytics Service Integration  
 - 🏷️ **v1.0.0** - Initial Production Release
 

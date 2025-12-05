@@ -2,6 +2,7 @@
 OAuth 2.0 Authentication Module for OpenAI Web Service
 This module integrates with the Authorization Server for user authentication
 """
+# pylint: disable=logging-fstring-interpolation,broad-exception-caught
 import os
 from typing import Optional, List
 from fastapi import Depends, HTTPException, status

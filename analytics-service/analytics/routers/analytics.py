@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Optional, List
 from datetime import datetime
+from pydantic import BaseModel, ConfigDict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -244,7 +245,6 @@ async def track_user_activity_admin(
 
 
 # Public tracking endpoints for service-to-service communication (no authentication)
-from pydantic import BaseModel
 
 class ActivityTrackingRequest(BaseModel):
     user_id: str
@@ -267,6 +267,8 @@ class ConversationTrackingRequest(BaseModel):
     action: str
 
 class MessageTrackingRequest(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+    
     message_id: str
     conversation_id: str
     user_id: str
@@ -591,5 +593,56 @@ async def clear_all_analytics(
         "cleared_by": current_user.username,
         "timestamp": datetime.utcnow().isoformat()
     }
+
+
+@router.delete("/users/{username}")
+async def delete_user_analytics(
+    username: str,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Delete all analytics data for a specific user.
+    
+    **Admin access required**
+    
+    This will delete:
+    - User profile
+    - All user activities
+    - All conversation metrics for this user
+    - All message metrics for this user
+    
+    WARNING: This action cannot be undone!
+    """
+    from analytics.models.analytics import (
+        UserProfile, UserActivity, ConversationMetrics, MessageMetrics
+    )
+    
+    # Find user profile by username
+    user_profile = db.query(UserProfile).filter(UserProfile.username == username).first()
+    if not user_profile:
+        raise HTTPException(status_code=404, detail=f"User '{username}' not found in analytics")
+    
+    user_id = user_profile.user_id
+    
+    # Delete all related records
+    deleted_counts = {
+        "user_activities": db.query(UserActivity).filter(UserActivity.user_id == user_id).delete(),
+        "message_metrics": db.query(MessageMetrics).filter(MessageMetrics.user_id == user_id).delete(),
+        "conversation_metrics": db.query(ConversationMetrics).filter(ConversationMetrics.user_id == user_id).delete(),
+        "user_profiles": db.query(UserProfile).filter(UserProfile.user_id == user_id).delete()
+    }
+    
+    db.commit()
+    
+    logger.info(f"Admin {current_user.username} deleted analytics for user '{username}': {deleted_counts}")
+    
+    return {
+        "message": f"All analytics data for user '{username}' deleted successfully",
+        "deleted_counts": deleted_counts,
+        "deleted_by": current_user.username,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
 
 

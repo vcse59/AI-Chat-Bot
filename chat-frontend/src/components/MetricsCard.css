@@ -1,15 +1,21 @@
+/* ============================================
+   MetricsCard Styles with Theme Support
+   ============================================ */
+
 .metrics-card {
-  background: #ffffff;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
   transition: transform 0.2s, box-shadow 0.2s;
   min-height: 140px;
+  border: 1px solid var(--border-primary);
+  backdrop-filter: blur(10px);
 }
 
 .metrics-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .metrics-card-header {
@@ -27,12 +33,12 @@
   width: 48px;
   height: 48px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
   color: white;
 }
 
 .metrics-card-icon.users {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
 }
 
 .metrics-card-icon.messages {
@@ -57,7 +63,7 @@
 
 .metrics-card-title {
   font-size: 14px;
-  color: #666;
+  color: var(--text-muted);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -66,14 +72,14 @@
 .metrics-card-value {
   font-size: 36px;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--text-primary);
   margin: 8px 0;
   line-height: 1;
 }
 
 .metrics-card-subtitle {
   font-size: 13px;
-  color: #999;
+  color: var(--text-muted);
   margin-top: 8px;
 }
 
@@ -89,18 +95,18 @@
 }
 
 .metrics-card-trend.positive {
-  background: #d4edda;
-  color: #155724;
+  background: var(--success-bg);
+  color: var(--success);
 }
 
 .metrics-card-trend.negative {
-  background: #f8d7da;
-  color: #721c24;
+  background: var(--error-bg);
+  color: var(--error);
 }
 
 .metrics-card-trend.neutral {
-  background: #e2e3e5;
-  color: #383d41;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
 }
 
 .metrics-card.loading {
@@ -109,7 +115,7 @@
 }
 
 .metrics-card-skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-hover) 50%, var(--bg-tertiary) 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
   border-radius: 4px;
@@ -125,10 +131,10 @@
 }
 
 .metrics-card-error {
-  color: #d32f2f;
+  color: var(--error);
   font-size: 14px;
   padding: 12px;
-  background: #ffebee;
+  background: var(--error-bg);
   border-radius: 4px;
   margin-top: 8px;
 }

@@ -35,9 +35,9 @@ The Analytics Service is a dedicated microservice that provides comprehensive an
 
 ## 🚀 Quick Start
 
-### Docker Deployment (Recommended)
+### Option 1: Docker Compose (Recommended for Full Platform)
 
-Run with full platform from project root:
+Run with the full ConvoAI platform from project root:
 
 ```bash
 docker-compose up analytics-service
@@ -45,76 +45,150 @@ docker-compose up analytics-service
 
 See main [README.md](../README.md) for complete Docker setup.
 
-### Local Development
+### Option 2: Standalone Docker Container
+
+**Prerequisites:** Auth service must be running first.
+
+```bash
+# Navigate to analytics-service directory
+cd analytics-service
+
+# Copy and configure environment
+cp .env.example .env
+# Edit .env - set AUTH_SECRET_KEY and AUTH_SERVICE_URL
+
+# Build the Docker image
+docker build -t analytics-service .
+
+# Run the container
+docker run -d \
+  --name analytics-service \
+  -p 8002:8002 \
+  --env-file .env \
+  -v $(pwd)/data:/app/data \
+  analytics-service
+
+# Check logs
+docker logs -f analytics-service
+
+# Stop the container
+docker stop analytics-service
+```
+
+**Windows (PowerShell):**
+```powershell
+# Run the container
+docker run -d `
+  --name analytics-service `
+  -p 8002:8002 `
+  --env-file .env `
+  -v ${PWD}/data:/app/data `
+  analytics-service
+
+# Check logs
+docker logs -f analytics-service
+
+# Stop the container
+docker stop analytics-service
+```
+
+**Windows (Command Prompt):**
+```cmd
+REM Run the container
+docker run -d --name analytics-service -p 8002:8002 --env-file .env -v %cd%/data:/app/data analytics-service
+
+REM Check logs
+docker logs -f analytics-service
+
+REM Stop the container
+docker stop analytics-service
+```
+
+### Option 3: Local Development (Without Docker)
 
 **Prerequisites:**
 - Python 3.12+
 - Auth service running (for authentication)
-- Chat service running (sends metrics data)
 
-**Setup:**
+**Setup Steps:**
 
-1. **Create virtual environment:**
+1. **Navigate to service directory:**
+   ```bash
+   cd analytics-service
+   ```
+
+2. **Create and activate virtual environment:**
    
    **Windows:**
    ```cmd
-   cd analytics-service
    python -m venv venv
    venv\Scripts\activate
    ```
    
    **Linux/Mac:**
    ```bash
-   cd analytics-service
    python -m venv venv
    source venv/bin/activate
    ```
 
-2. **Install dependencies:**
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Configure environment:**
-   
-   Ensure root `.env` exists:
-   ```env
-   # ConvoAI/.env
-   AUTH_SECRET_KEY=your-secret-key-here
-   OPENAI_API_KEY=your-openai-key-here
-   ```
-   
-   Service `.env`:
-   ```env
-   # analytics-service/.env
-   PORT=8002
-   HOST=0.0.0.0
-   AUTH_SERVICE_URL=http://localhost:8001
-   CORS_ORIGINS=http://localhost:3000
-   ```
-
-4. **Run the service:**
+4. **Configure environment:**
    ```bash
-   uvicorn main:app --reload --port 8002
+   cp .env.example .env
+   # Edit .env with your settings:
+   # - AUTH_SECRET_KEY (must match auth-service)
+   # - AUTH_SERVICE_URL=http://localhost:8001
    ```
 
-**Using Platform Scripts** (from project root):
+5. **Create data directory:**
+   
+   **Linux/Mac:**
+   ```bash
+   mkdir -p data
+   ```
+   
+   **Windows (PowerShell):**
+   ```powershell
+   New-Item -ItemType Directory -Force -Path data
+   ```
+   
+   **Windows (Command Prompt):**
+   ```cmd
+   mkdir data 2>nul
+   ```
 
-**Windows:**
-```cmd
-scripts\windows\start-analytics-service.bat
+6. **Run the service:**
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+   ```
+
+**Access Points:**
+- API Documentation: http://localhost:8002/docs
+- Alternative Docs: http://localhost:8002/redoc
+- Health Check: http://localhost:8002/health
+
+### Environment Configuration
+
+Copy `.env.example` to `.env` and configure:
+
+```env
+# Server
+HOST=0.0.0.0
+PORT=8002
+
+# Database
+DATABASE_URL=sqlite:///./data/analytics.db
+
+# Auth service (must match auth-service settings)
+AUTH_SERVICE_URL=http://localhost:8001
+AUTH_SECRET_KEY=your-secret-key-must-match-auth-service
 ```
 
-**Linux/Mac:**
-```bash
-scripts/linux-mac/start-analytics-service.sh
-```
-
-### Access Points
-
-- **API Documentation**: http://localhost:8002/docs
-- **Alternative Docs**: http://localhost:8002/redoc
-- **Health Check**: http://localhost:8002/health
+See `.env.example` for full configuration options.
 
 ### Database Configuration
 

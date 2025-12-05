@@ -184,3 +184,8 @@ If you encounter issues:
 ---
 
 **That's it! You're ready to manage MCP servers in ConvoAI! 🎉**
+
+---
+
+**Last Updated:** December 5, 2025  
+**Version:** 3.0.0

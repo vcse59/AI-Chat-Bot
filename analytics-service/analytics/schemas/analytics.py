@@ -35,7 +35,7 @@ class ConversationMetricsSchema(BaseModel):
 
 class MessageMetricsSchema(BaseModel):
     """Schema for message metrics"""
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
     
     id: int
     message_id: str
@@ -140,6 +140,8 @@ class ConversationDetailedMetrics(BaseModel):
 
 class MessageDetailedMetrics(BaseModel):
     """Detailed metrics for messages"""
+    model_config = ConfigDict(protected_namespaces=())
+    
     message_id: str
     conversation_id: str
     user_id: str

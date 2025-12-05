@@ -1,6 +1,6 @@
 # GitHub Releases Creation Guide
 
-This guide will help you create GitHub releases for ConvoAI versions v1.0.0, v1.1.0, and v2.0.0.
+This guide will help you create GitHub releases for ConvoAI versions v1.0.0, v1.1.0, v2.0.0, and v3.0.0.
 
 ## Prerequisites
 
@@ -38,6 +38,15 @@ This guide will help you create GitHub releases for ConvoAI versions v1.0.0, v1.
 2. **Choose a tag**: Select `v2.0.0` from dropdown
 3. **Release title**: `v2.0.0 - MCP Integration (Major Feature Release)`
 4. **Description**: Copy content from `RELEASE_NOTES_v2.0.0.md`
+5. **This is a pre-release**: Leave unchecked
+6. Click "Publish release"
+
+### Step 5: Create Release v3.0.0
+
+1. Click "Draft a new release" again
+2. **Choose a tag**: Select `v3.0.0` from dropdown
+3. **Release title**: `v3.0.0 - Theme Toggle, Cross-Platform Support & Documentation Enhancement`
+4. **Description**: Copy content from `RELEASE_NOTES_v3.0.0.md`
 5. **Set as latest release**: Check this box
 6. **This is a pre-release**: Leave unchecked
 7. Click "Publish release"
@@ -59,7 +68,10 @@ gh release create v1.0.0 --title "v1.0.0 - Initial Production Release" --notes-f
 gh release create v1.1.0 --title "v1.1.0 - Analytics Service Integration" --notes-file RELEASE_NOTES_v1.1.0.md
 
 # Create release v2.0.0
-gh release create v2.0.0 --title "v2.0.0 - MCP Integration (Major Feature Release)" --notes-file RELEASE_NOTES_v2.0.0.md --latest
+gh release create v2.0.0 --title "v2.0.0 - MCP Integration (Major Feature Release)" --notes-file RELEASE_NOTES_v2.0.0.md
+
+# Create release v3.0.0
+gh release create v3.0.0 --title "v3.0.0 - Theme Toggle, Cross-Platform Support & Documentation Enhancement" --notes-file RELEASE_NOTES_v3.0.0.md --latest
 ```
 
 ## Method 3: Using PowerShell Script (Advanced)
@@ -72,7 +84,8 @@ After creating releases, verify at:
 https://github.com/vcse59/ConvoAI/releases
 
 You should see:
-- ✅ v2.0.0 - MCP Integration (Latest)
+- ✅ v3.0.0 - Theme Toggle, Cross-Platform Support & Documentation Enhancement (Latest)
+- ✅ v2.0.0 - MCP Integration
 - ✅ v1.1.0 - Analytics Service Integration
 - ✅ v1.0.0 - Initial Production Release
 

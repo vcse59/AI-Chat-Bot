@@ -454,3 +454,8 @@ For issues or questions about analytics:
 3. Consult main [README.md](README.md)
 4. Open GitHub issue with [Analytics] tag
 
+---
+
+**Last Updated:** December 5, 2025  
+**Version:** 3.0.0
+

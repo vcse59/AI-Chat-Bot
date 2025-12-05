@@ -112,6 +112,37 @@ def sanitize_html(text: str) -> str:
     clean_text = re.sub(r'<[^>]+>', '', text)
     return clean_text.strip()
 
+def validate_message_content(content: str, max_length: int = 10000) -> tuple:
+    """
+    Validate chat message content
+    
+    Args:
+        content: Message content to validate
+        max_length: Maximum allowed message length
+        
+    Returns:
+        Tuple of (is_valid: bool, sanitized_content: str, error_message: Optional[str])
+    """
+    if not content:
+        return False, "", "Message content cannot be empty"
+    
+    if not isinstance(content, str):
+        return False, "", "Message content must be a string"
+    
+    # Strip whitespace
+    content = content.strip()
+    
+    if len(content) == 0:
+        return False, "", "Message content cannot be empty"
+    
+    if len(content) > max_length:
+        return False, "", f"Message content exceeds maximum length of {max_length} characters"
+    
+    # Sanitize HTML
+    sanitized = sanitize_html(content)
+    
+    return True, sanitized, None
+
 def validate_price(price: Any) -> bool:
     """
     Validate price value (should be non-negative number)

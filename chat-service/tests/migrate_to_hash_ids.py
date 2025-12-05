@@ -8,6 +8,7 @@ IMPORTANT: This script will modify your database structure!
 
 Run this script when you want to migrate to hash-based IDs.
 """
+# pylint: disable=broad-exception-caught
 import sys
 import os
 import logging

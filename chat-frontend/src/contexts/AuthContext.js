@@ -12,6 +12,8 @@ export const AuthProvider = ({ children }) => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
     setLoading(false);
+    console.log('[AuthProvider] user:', currentUser);
+    console.log('[AuthProvider] isAuthenticated:', !!currentUser);
   }, []);
 
   const login = async (username, password) => {
@@ -45,6 +47,11 @@ export const AuthProvider = ({ children }) => {
   const hasRole = (role) => {
     return user && user.roles && user.roles.includes(role);
   };
+
+  useEffect(() => {
+    console.log('[AuthProvider] user updated:', user);
+    console.log('[AuthProvider] isAuthenticated updated:', !!user);
+  }, [user]);
 
   const value = {
     user,

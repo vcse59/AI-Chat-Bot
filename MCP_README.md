@@ -1,8 +1,8 @@
-# MCP Server Integration Guide
+# Model Context Protocol (MCP) Integration Guide
 
 ## Overview
 
-The AI ChatBot Platform supports **Model Context Protocol (MCP) server integration**, allowing users to register custom MCP servers and extend the AI's capabilities with external tools.
+ConvoAI supports **Model Context Protocol (MCP) server integration**, allowing users to register custom MCP servers and extend the AI's capabilities with external tools and APIs through OpenAI's function calling.
 
 ## Features
 
@@ -15,7 +15,7 @@ The AI ChatBot Platform supports **Model Context Protocol (MCP) server integrati
 
 ## How It Works
 
-### Architecture
+### Architecture Flow
 
 ```
 User ─┬─► Web UI (MCP Server Manager)
@@ -25,22 +25,22 @@ User ─┬─► Web UI (MCP Server Manager)
             └─► Send Message ──► Chat Service
                                    ├─► Discover Tools from Active MCP Servers
                                    ├─► Convert Tools to OpenAI Functions
-                                   ├─► Call OpenAI with Functions
+                                   ├─► Call OpenAI API with Available Functions
                                    └─► If function_call returned:
                                          ├─► Execute MCP Tool (with user token)
-                                         └─► Return result to OpenAI
+                                         └─► Send result back to OpenAI
 ```
 
 ### Authentication Flow
 
-1. User logs in → Receives JWT token
-2. Token stored in browser's localStorage
-3. User registers MCP server (no auth credentials needed)
-4. When chatting:
+1. **User logs in** → Receives JWT token from auth-service
+2. **Token stored** in browser's localStorage
+3. **User registers MCP server** (no manual auth credentials needed)
+4. **During chat**:
    - User token automatically included in WebSocket connection
-   - Token passed to `mcp_tools_service`
+   - Chat service passes token to `mcp_tools_service`
    - Token sent as `Authorization: Bearer <token>` to MCP servers
-5. MCP servers validate the token and execute tools
+5. **MCP servers** validate the token and execute tools securely
 
 ## Registering an MCP Server
 
@@ -48,46 +48,48 @@ User ─┬─► Web UI (MCP Server Manager)
 
 1. **Log in** to the platform (http://localhost:3000)
 
-2. **Click the "🔌 MCP Servers" button** in the top navigation bar
+2. **Click the "MCP Servers" button** in the chat interface
 
-3. **Click "+ Add MCP Server"**
+3. **Click "Register MCP Server"**
 
 4. **Fill in the form**:
-   - **Name**: Descriptive name (e.g., "Timezone Server")
+   - **Name**: Descriptive name (e.g., "Timezone Service")
    - **Description**: Optional description of what the server does
    - **Server URL**: The MCP server endpoint
-     - For local Docker services: `http://service-name:port/mcp`
+     - For Docker services: `http://service-name:port/mcp`
      - Example: `http://timezone-mcp-server:8003/mcp`
-   - **Active**: Check to enable immediately
+   - **Active**: Check to enable the server immediately
 
-5. **Click "Create Server"**
+5. **Click "Register Server"**
 
-### Example: Timezone MCP Server
+### Example: Built-in Timezone MCP Server
 
-The platform includes a built-in timezone MCP server as an example.
+ConvoAI includes a reference implementation timezone MCP server.
 
-**Register it with**:
-- **Name**: "Timezone Server"
-- **Description**: "Get current time in any timezone"
+**Registration Details**:
+- **Name**: `Timezone Service`
+- **Description**: `Get current time for any timezone worldwide`
 - **Server URL**: `http://timezone-mcp-server:8003/mcp`
-- **Active**: ✓
+- **Active**: ✓ (Checked)
 
-**Test it by asking**:
+**Test Queries**:
 - "What time is it in Tokyo?"
 - "Tell me the current time in New York"
 - "What's the time in London right now?"
+- "Show me the time in Sydney"
 
-The AI will automatically use the timezone MCP server tool to answer.
+The AI will automatically discover and use the `get_current_time` tool to answer.
 
 ## Creating Your Own MCP Server
 
 ### MCP Server Requirements
 
-Your MCP server must:
-1. Accept JSON-RPC 2.0 requests
-2. Implement the `tools/list` method to advertise available tools
-3. Implement tool execution via JSON-RPC
-4. Accept and validate JWT tokens from the `Authorization` header
+Your custom MCP server must:
+1. **Accept JSON-RPC 2.0 requests** over HTTP POST
+2. **Implement `tools/list` method** to advertise available tools
+3. **Implement `tools/call` method** for tool execution
+4. **Accept and validate JWT tokens** from the `Authorization` header
+5. **Return MCP-compliant responses** with proper error handling
 
 ### Example MCP Server (Python)
 
@@ -191,14 +193,16 @@ def execute_my_tool(args):
 
 **Dockerfile**:
 ```dockerfile
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+
+EXPOSE 8003
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]
 ```
@@ -213,14 +217,17 @@ my-mcp-server:
   environment:
     - AUTH_SECRET_KEY=${AUTH_SECRET_KEY}
   networks:
-    - ai-chatbot-network
+    - convoai-network
+  restart: unless-stopped
 ```
 
-### Register in UI
+### Register in ConvoAI
 
-After deploying, register your server:
-- **Name**: "My Custom Server"
+After deploying your server, register it in the UI:
+- **Name**: `My Custom MCP Server`
+- **Description**: `Brief description of your server's capabilities`
 - **Server URL**: `http://my-mcp-server:8003/mcp`
+- **Active**: ✓ (Checked)
 
 ## Tool Schema Format
 
@@ -258,12 +265,12 @@ Tools must follow the OpenAI function calling schema:
 
 3. **Check logs**:
    ```bash
-   docker logs openai-chatbot-api --tail 50
+   docker logs chat-service --tail 50
    ```
    Look for:
-   - `Discovered X MCP servers with tools`
-   - `OpenAI requested MCP tool: tool_name`
-   - `Calling MCP tool: tool_name with args: {...}`
+   - `Discovered X MCP servers with tools for user`
+   - `OpenAI requested function call: tool_name`
+   - `Calling MCP tool: tool_name with arguments`
 
 4. **Test MCP server directly**:
    ```bash
@@ -287,35 +294,42 @@ Tools must follow the OpenAI function calling schema:
 ERROR:services.mcp_tools_service:Error discovering tools from MyServer: All connection attempts failed
 ```
 
-**Causes**:
-- Server URL is incorrect
-- Server is not running
-- Server is not accessible from chat-service container
+**Common Causes**:
+- Incorrect server URL
+- MCP server not running
+- MCP server not accessible from chat-service container
+- Network connectivity issues
 - Firewall blocking connection
 
 **Solutions**:
-1. Verify server is running: `docker ps | grep my-server`
-2. Check Docker network: `docker network inspect ai-chatbot-network`
-3. Use service names not localhost: `http://my-server:port` not `http://localhost:port`
-4. Test connectivity: `docker exec openai-chatbot-api curl http://my-server:port/mcp`
+1. **Verify server is running**: `docker ps | grep my-mcp-server`
+2. **Check Docker network**: `docker network inspect convoai-network`
+3. **Use service names, not localhost**: 
+   - ✅ Correct: `http://my-mcp-server:8003/mcp`
+   - ❌ Wrong: `http://localhost:8003/mcp`
+4. **Test connectivity**: 
+   ```bash
+   docker exec chat-service curl http://my-mcp-server:8003/mcp
+   ```
 
-### Tools Not Appearing in OpenAI
+### Tools Not Appearing in Chat
 
-**Check tool discovery**:
+**Check tool discovery logs**:
 ```bash
-docker logs openai-chatbot-api --tail 100 | grep "Discovered.*MCP servers"
+docker logs chat-service --tail 100 | grep "Discovered.*MCP servers"
 ```
 
-**Should see**:
+**Expected output**:
 ```
-INFO:services.mcp_tools_service:Discovered 1 MCP servers with tools for user xxx
+INFO:services.mcp_tools_service:Discovered 1 MCP servers with tools for user <user_id>
 ```
 
-**If seeing 0 servers**:
-1. User token not being passed (check WebSocket connection includes token)
-2. Server URL unreachable
-3. Server returning error on `tools/list`
-4. Server not marked as active
+**If seeing "Discovered 0 MCP servers"**:
+1. **User token issue**: Token not being passed via WebSocket
+2. **Server unreachable**: Check server URL and network connectivity
+3. **Server error**: MCP server returning error on `tools/list` request
+4. **Server inactive**: Verify server is marked as active in UI
+5. **Authentication failure**: MCP server rejecting the user token
 
 ### Authentication Errors (401)
 
@@ -336,24 +350,29 @@ ERROR: MCP server returned 401 Unauthorized
 ## Best Practices
 
 ### Security
-- ✅ Always validate JWT tokens in your MCP server
-- ✅ Use the same `AUTH_SECRET_KEY` as the platform
-- ✅ Implement rate limiting for tool calls
-- ✅ Sanitize and validate all input parameters
-- ✅ Log all tool executions for audit trails
+- ✅ **Always validate JWT tokens** in your MCP server
+- ✅ **Use the same `AUTH_SECRET_KEY`** as ConvoAI auth-service
+- ✅ **Implement rate limiting** to prevent abuse
+- ✅ **Sanitize and validate** all input parameters
+- ✅ **Log tool executions** for audit trails and debugging
+- ✅ **Use HTTPS** for production MCP servers
+- ✅ **Implement error handling** to avoid exposing sensitive information
 
 ### Performance
-- ✅ Keep tool execution fast (<5 seconds)
-- ✅ Return errors quickly if tool can't execute
-- ✅ Implement caching for expensive operations
-- ✅ Use async/await for I/O operations
+- ✅ **Keep tool execution fast** (<5 seconds ideal)
+- ✅ **Return errors quickly** if tool can't execute
+- ✅ **Implement caching** for expensive operations
+- ✅ **Use async/await** for I/O-bound operations
+- ✅ **Connection pooling** for database/API calls
+- ✅ **Timeout handling** for external API calls
 
 ### Usability
-- ✅ Write clear, descriptive tool names
-- ✅ Provide detailed parameter descriptions
-- ✅ Include examples in descriptions
-- ✅ Return user-friendly error messages
-- ✅ Test with various input combinations
+- ✅ **Clear, descriptive tool names** (use snake_case)
+- ✅ **Detailed parameter descriptions** with examples
+- ✅ **Proper JSON Schema** for parameters
+- ✅ **User-friendly error messages** (not stack traces)
+- ✅ **Test with various inputs** including edge cases
+- ✅ **Document return value format** clearly
 
 ## Example Use Cases
 
@@ -406,13 +425,13 @@ ERROR: MCP server returned 401 Unauthorized
 
 ### Backend MCP Integration
 
-**Service**: `chat-service/services/mcp_tools_service.py`
+**Service Location**: `chat-service/services/mcp_tools_service.py`
 
 **Key Methods**:
-- `get_available_tools()` - Discovers tools from all active MCP servers
-- `call_tool(server_id, tool_name, arguments)` - Executes a specific tool
-- `_discover_server_tools(server)` - Calls `tools/list` on MCP server
-- `_call_tool_on_server(server, tool_name, arguments)` - Calls `tools/call`
+- `get_available_tools(user_id: str, user_token: str)` - Discovers tools from all active MCP servers for user
+- `call_tool(server_id: str, tool_name: str, arguments: dict, user_token: str)` - Executes a specific tool
+- `_discover_server_tools(server: MCPServer, user_token: str)` - Calls `tools/list` on MCP server
+- `_call_tool_on_server(server: MCPServer, tool_name: str, arguments: dict, user_token: str)` - Calls `tools/call`
 
 **Database**: `chat-service/engine/models.py`
 
@@ -434,32 +453,38 @@ class MCPServer(Base):
 
 ### REST API Endpoints
 
-**Base URL**: `http://localhost:8000/api/v1`
+**Base URL**: `http://localhost:8000/api`
 
-**Authentication**: All endpoints require `Authorization: Bearer <token>`
+**Authentication**: All endpoints require `Authorization: Bearer <token>` header
 
 #### List MCP Servers
 ```http
 GET /mcp-servers/
-Query Params:
-  - active_only: boolean (default: false)
-  - skip: int (default: 0)
-  - limit: int (default: 100)
+Query Parameters:
+  - active_only: boolean (optional, default: false)
+  - skip: integer (optional, default: 0)
+  - limit: integer (optional, default: 100)
 
-Response: MCPServerResponse[]
+Response: Array<MCPServerResponse>
+Status: 200 OK
 ```
 
 #### Create MCP Server
 ```http
 POST /mcp-servers/
+Headers:
+  - Content-Type: application/json
+  - Authorization: Bearer <token>
+  
 Body: {
-  "name": "string",
-  "description": "string?",
-  "server_url": "string",
-  "is_active": boolean
+  "name": "string" (required),
+  "description": "string" (optional),
+  "server_url": "string" (required),
+  "is_active": boolean (optional, default: true)
 }
 
 Response: MCPServerResponse
+Status: 201 Created
 ```
 
 #### Get MCP Server
@@ -467,43 +492,90 @@ Response: MCPServerResponse
 GET /mcp-servers/{server_id}
 
 Response: MCPServerResponse
+Status: 200 OK | 404 Not Found
 ```
 
 #### Update MCP Server
 ```http
 PUT /mcp-servers/{server_id}
+Headers:
+  - Content-Type: application/json
+  - Authorization: Bearer <token>
+  
 Body: {
-  "name": "string?",
-  "description": "string?",
-  "server_url": "string?",
-  "is_active": boolean?
+  "name": "string" (optional),
+  "description": "string" (optional),
+  "server_url": "string" (optional),
+  "is_active": boolean (optional)
 }
 
 Response: MCPServerResponse
+Status: 200 OK | 404 Not Found
 ```
 
 #### Delete MCP Server
 ```http
 DELETE /mcp-servers/{server_id}
 
-Response: 200 OK
+Response: {"message": "MCP server deleted successfully"}
+Status: 200 OK | 404 Not Found
+```
+
+**MCPServerResponse Schema**:
+```json
+{
+  "id": "string",
+  "user_id": "string",
+  "name": "string",
+  "description": "string | null",
+  "server_url": "string",
+  "is_active": boolean,
+  "created_at": "datetime",
+  "updated_at": "datetime"
+}
 ```
 
 ## Additional Resources
 
-- [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
-- [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- [JWT.io](https://jwt.io/) - JWT token debugger
+- **[OpenAI Function Calling Documentation](https://platform.openai.com/docs/guides/function-calling)** - Official OpenAI guide
+- **[JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)** - Protocol standard
+- **[FastAPI Documentation](https://fastapi.tiangolo.com/)** - Python web framework
+- **[JWT.io](https://jwt.io/)** - JWT token debugger and validator
+- **[Timezone MCP Server](timezone-mcp-server/README.md)** - Reference implementation
 
-## Support
+## Support & Troubleshooting
 
-For MCP integration questions:
-1. Check the [Main README](README.md)
-2. Review [MCP Quickstart Guide](docs/MCP_QUICKSTART.md)
-3. See [MCP Implementation Summary](docs/MCP_IMPLEMENTATION_SUMMARY.md)
-4. Open an issue on GitHub with:
-   - MCP server URL
-   - Tool schema
-   - Logs from `docker logs openai-chatbot-api`
-   - Steps to reproduce
+For MCP integration questions and issues:
+
+1. **Review Documentation**:
+   - [Main README](README.md) - Project overview
+   - [MCP Quickstart Guide](docs/MCP_QUICKSTART.md) - Getting started
+   - [Timezone MCP Server README](timezone-mcp-server/README.md) - Example implementation
+
+2. **Check Logs**:
+   ```bash
+   # Chat service logs (MCP integration)
+   docker logs chat-service --tail 100
+   
+   # Your MCP server logs
+   docker logs my-mcp-server --tail 100
+   
+   # All services
+   docker-compose logs --tail 50
+   ```
+
+3. **Common Issues**:
+   - Server URL using `localhost` instead of service name
+   - AUTH_SECRET_KEY mismatch between services
+   - Server not marked as active in UI
+   - Token not being passed in WebSocket connection
+   - MCP server not implementing required methods
+
+4. **Open a GitHub Issue** with:
+   - MCP server URL and configuration
+   - Complete tool schema (from `tools/list`)
+   - Relevant logs from `docker logs chat-service`
+   - Steps to reproduce the issue
+   - Expected vs actual behavior
+
+**GitHub Issues**: https://github.com/vcse59/ConvoAI/issues

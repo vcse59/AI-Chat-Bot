@@ -1,19 +1,18 @@
 """
 Conversation and message CRUD operations using utility functions
 """
+# pylint: disable=logging-fstring-interpolation,broad-exception-caught
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
-from datetime import datetime
 from engine import models, schemas
 from utilities.database_utils import (
-    get_entity_by_id, get_entities_paginated, create_entity, 
+    get_entity_by_id, get_entities_paginated,
     update_entity, delete_entity
 )
 from utilities.datetime_utils import get_utc_now
 from utilities.logging_utils import log_database_operation
 from utilities.hash_utils import (
-    generate_conversation_hash, generate_message_hash,
-    validate_conversation_hash, validate_message_hash
+    generate_conversation_hash, generate_message_hash
 )
 import logging
 
@@ -39,7 +38,7 @@ def create_conversation(db: Session, conversation: schemas.ConversationCreate) -
         db.refresh(db_conversation)
         
         log_database_operation(
-            logger, "create", "conversations", db_conversation.id, 
+            logger, "create", "conversations", conversation_id, 
             user_id=conversation.user_id, success=True
         )
         return db_conversation
@@ -187,7 +186,7 @@ def create_message(db: Session, message: schemas.ChatMessageCreate) -> models.Ch
         db.refresh(db_message)
         
         log_database_operation(
-            logger, "create", "chat_messages", db_message.id, 
+            logger, "create", "chat_messages", message_id, 
             success=True
         )
         return db_message

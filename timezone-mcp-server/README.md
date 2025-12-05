@@ -106,80 +106,162 @@ Discover available tools on this MCP server.
 
 ## Running the Server
 
-### Option 1: With Docker Compose (Recommended)
+### Option 1: Docker Compose (Recommended for Full Platform)
+
+Run with the full ConvoAI platform from project root:
+
 ```bash
-# From project root
 docker-compose up timezone-mcp-server
 ```
 
-### Option 2: Standalone with Docker
+### Option 2: Standalone Docker Container
+
 ```bash
-# From timezone-mcp-server directory
+# Navigate to timezone-mcp-server directory
+cd timezone-mcp-server
+
+# Copy and configure environment
+cp .env.example .env
+# Edit .env - set AUTH_SECRET_KEY and AUTH_SERVICE_URL
+
+# Build the Docker image
 docker build -t timezone-mcp-server .
-docker run -p 8003:8003 timezone-mcp-server
+
+# Run the container
+docker run -d \
+  --name timezone-mcp-server \
+  -p 8003:8003 \
+  --env-file .env \
+  timezone-mcp-server
+
+# Check logs
+docker logs -f timezone-mcp-server
+
+# Stop the container
+docker stop timezone-mcp-server
 ```
 
-### Option 3: On Host Machine (Local Development)
+**Windows (PowerShell):**
+```powershell
+# Run the container
+docker run -d `
+  --name timezone-mcp-server `
+  -p 8003:8003 `
+  --env-file .env `
+  timezone-mcp-server
+
+# Check logs
+docker logs -f timezone-mcp-server
+
+# Stop the container
+docker stop timezone-mcp-server
+```
+
+**Windows (Command Prompt):**
+```cmd
+REM Run the container
+docker run -d --name timezone-mcp-server -p 8003:8003 --env-file .env timezone-mcp-server
+
+REM Check logs
+docker logs -f timezone-mcp-server
+
+REM Stop the container
+docker stop timezone-mcp-server
+```
+
+### Option 3: Local Development (Without Docker)
 
 **Prerequisites:**
 - Python 3.12+
-- Terminal/Command Prompt
+- Auth service running (for token verification)
 
 **Setup Steps:**
 
-1. **Navigate to timezone-mcp-server directory**
+1. **Navigate to service directory:**
    ```bash
    cd timezone-mcp-server
    ```
 
-2. **Create virtual environment**
+2. **Create and activate virtual environment:**
+   
+   **Windows:**
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+   
+   **Linux/Mac:**
    ```bash
    python -m venv venv
-   ```
-
-3. **Activate virtual environment**
-   ```bash
-   # Windows
-   venv\Scripts\activate
-   
-   # Linux/Mac
    source venv/bin/activate
    ```
 
-4. **Install dependencies**
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-5. **Configure environment** (optional - create `.env` file)
-   ```env
-   HOST=0.0.0.0
-   PORT=8003
-   LOG_LEVEL=info
-   ```
-
-6. **Start the server**
+4. **Configure environment:**
+   
+   **Linux/Mac:**
    ```bash
-   uvicorn main:app --host 0.0.0.0 --port 8003 --reload
+   cp .env.example .env
+   # Edit .env with your settings
+   ```
+   
+   **Windows (PowerShell):**
+   ```powershell
+   Copy-Item .env.example .env
+   # Edit .env with your settings
+   ```
+   
+   **Windows (Command Prompt):**
+   ```cmd
+   copy .env.example .env
+   REM Edit .env with your settings
+   ```
+   
+   **Required settings:**
+   - `AUTH_SECRET_KEY` (must match auth-service)
+   - `AUTH_SERVICE_URL=http://localhost:8001`
+
+5. **Run the server:**
+   ```bash
+   uvicorn mcp_http_server:app --host 0.0.0.0 --port 8003 --reload
    ```
 
-7. **Verify server is running**
-   - Health Check: http://localhost:8003/health
-   - MCP Endpoint: http://localhost:8003/mcp
+**Access Points:**
+- Health Check: http://localhost:8003/health
+- MCP Endpoint: http://localhost:8003/mcp
+
+### Environment Configuration
+
+Copy `.env.example` to `.env` and configure:
+
+```env
+# Server
+HOST=0.0.0.0
+PORT=8003
+
+# Auth service (must match auth-service settings)
+AUTH_SERVICE_URL=http://localhost:8001
+AUTH_SECRET_KEY=your-secret-key-must-match-auth-service
+
+# Logging
+LOG_LEVEL=INFO
+```
+
+See `.env.example` for full configuration options.
 
 **Development Mode:**
 ```bash
-# With auto-reload for development
-uvicorn main:app --host 0.0.0.0 --port 8003 --reload
+uvicorn mcp_http_server:app --host 0.0.0.0 --port 8003 --reload
 ```
 
 **Production Mode:**
 ```bash
-# Install production server
 pip install gunicorn
-
-# Run with multiple workers
-gunicorn main:app --workers 2 \
+gunicorn mcp_http_server:app --workers 2 \
   --worker-class uvicorn.workers.UvicornWorker \
   --bind 0.0.0.0:8003
 ```
@@ -188,7 +270,7 @@ gunicorn main:app --workers 2 \
 
 ```bash
 # Port already in use
-uvicorn main:app --host 0.0.0.0 --port 8013
+uvicorn mcp_http_server:app --host 0.0.0.0 --port 8013
 
 # Import errors
 pip install -r requirements.txt

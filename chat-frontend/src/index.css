@@ -16,3 +16,48 @@ code {
   width: 100%;
   height: 100vh;
 }
+
+/* ============================================
+   Version Badge - Global Styles
+   ============================================ */
+
+/* Version badge for headers (dark mode/light mode compatible) */
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(74, 144, 217, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+  color: #4a90d9;
+  border: 1px solid rgba(74, 144, 217, 0.3);
+  margin-left: 8px;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.version-badge:hover {
+  background: linear-gradient(135deg, rgba(74, 144, 217, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+  border-color: rgba(74, 144, 217, 0.5);
+}
+
+/* Dark theme version badge in login/register cards */
+.login-card .version-badge,
+.register-card .version-badge {
+  display: block;
+  text-align: center;
+  margin-top: 24px;
+  padding: 6px 16px;
+  background: rgba(74, 144, 217, 0.15);
+  color: rgba(74, 144, 217, 0.9);
+  border: 1px solid rgba(74, 144, 217, 0.25);
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+/* Header logo version badge */
+.header-logo .version-badge {
+  vertical-align: middle;
+}

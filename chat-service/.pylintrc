@@ -1,0 +1,50 @@
+[MAIN]
+# Ignore specific directories
+ignore=.venv,alembic,__pycache__,data,tests
+
+[MESSAGES CONTROL]
+# Disable low-priority style warnings to focus on code quality
+disable=
+    C0303,  # trailing-whitespace
+    C0304,  # missing-final-newline
+    C0301,  # line-too-long
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116,  # missing-function-docstring
+    C0411,  # wrong-import-order
+    C0412,  # ungrouped-imports
+    C0413,  # wrong-import-position
+    C0103,  # invalid-name (for module/constant naming)
+    C0121,  # singleton-comparison (intentional for SQLAlchemy filters)
+    E0401,  # import-error (false positives in Docker environment)
+    E0611,  # no-name-in-module
+    E1102,  # not-callable (false positive with SQLAlchemy func.now)
+    W0611,  # unused-import (handled with explicit disables)
+    W1203,  # logging-fstring-interpolation
+    W0718,  # broad-exception-caught
+    W0702,  # bare-except
+    W0612,  # unused-variable
+    W0603,  # global-statement
+    W0212,  # protected-access
+    R0903,  # too-few-public-methods (expected for models/schemas)
+    R0911,  # too-many-return-statements
+    R0912,  # too-many-branches
+    R0913,  # too-many-arguments
+    R0914,  # too-many-locals
+    R0915,  # too-many-statements
+    R0917,  # too-many-positional-arguments
+    R1702,  # too-many-nested-blocks
+    R1705,  # no-else-return
+    W0707,  # raise-missing-from
+    W0613,  # unused-argument
+    W1508,  # invalid-envvar-default
+    C0415,  # import-outside-toplevel
+    R1708,  # stop-iteration-return
+    W1309,  # f-string-without-interpolation
+    R0801,  # duplicate-code
+
+[FORMAT]
+max-line-length=120
+
+[DESIGN]
+max-args=8

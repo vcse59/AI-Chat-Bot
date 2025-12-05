@@ -1,6 +1,7 @@
 """
 Item-specific CRUD operations using utility functions
 """
+# pylint: disable=logging-fstring-interpolation,broad-exception-caught
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from engine import models, schemas

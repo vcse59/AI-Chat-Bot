@@ -16,11 +16,16 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     password: Optional[str] = None
     is_active: Optional[bool] = None
+    theme_preference: Optional[str] = None
+
+class ThemeUpdate(BaseModel):
+    theme_preference: str
 
 class UserInDB(UserBase):
     id: int
     is_active: bool
     roles: List[str]
+    theme_preference: str = "dark"
 
     model_config = ConfigDict(from_attributes=True)
     

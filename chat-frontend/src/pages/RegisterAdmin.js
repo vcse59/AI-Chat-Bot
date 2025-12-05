@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { VERSION } from '../config/version';
 import authService from '../services/authService';
-import './Register.css';
+import './RegisterAdmin.css';
 
 const RegisterAdmin = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,7 @@ const RegisterAdmin = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const { user, logout, isAdmin } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const navigate = useNavigate();
 
   // Redirect if not admin
@@ -104,8 +107,16 @@ const RegisterAdmin = () => {
           <button onClick={handleCancel} className="back-button">
             ← Back to Chat
           </button>
+          <div className="header-logo">
+            <span className="logo-icon">💬</span>
+            <span className="logo-text">ConvoAI</span>
+            <span className="version-badge">v{VERSION}</span>
+          </div>
         </div>
         <div className="header-right">
+          <button onClick={toggleTheme} className="theme-toggle-btn" title={`Switch to ${isDark ? 'light' : 'dark'} mode`}>
+            {isDark ? '☀️ Light' : '🌙 Dark'}
+          </button>
           <span className="username">👤 {user?.username}</span>
           <button onClick={handleLogout} className="logout-button">
             Logout

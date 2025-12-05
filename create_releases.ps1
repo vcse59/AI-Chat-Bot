@@ -81,6 +81,7 @@ Write-Host "Reading release notes files..." -ForegroundColor Yellow
 $releaseNotes_v1_0_0 = Get-Content "RELEASE_NOTES_v1.0.0.md" -Raw -ErrorAction Stop
 $releaseNotes_v1_1_0 = Get-Content "RELEASE_NOTES_v1.1.0.md" -Raw -ErrorAction Stop
 $releaseNotes_v2_0_0 = Get-Content "RELEASE_NOTES_v2.0.0.md" -Raw -ErrorAction Stop
+$releaseNotes_v3_0_0 = Get-Content "RELEASE_NOTES_v3.0.0.md" -Raw -ErrorAction Stop
 
 Write-Host "✓ Release notes loaded successfully`n" -ForegroundColor Green
 
@@ -95,8 +96,12 @@ Start-Sleep -Seconds 2
 $release_v1_1_0 = Create-GitHubRelease -TagName "v1.1.0" -Name "v1.1.0 - Analytics Service Integration" -Body $releaseNotes_v1_1_0 -IsLatest $false
 Start-Sleep -Seconds 2
 
-# Create v2.0.0 (Latest)
-$release_v2_0_0 = Create-GitHubRelease -TagName "v2.0.0" -Name "v2.0.0 - MCP Integration (Major Feature Release)" -Body $releaseNotes_v2_0_0 -IsLatest $true
+# Create v2.0.0
+$release_v2_0_0 = Create-GitHubRelease -TagName "v2.0.0" -Name "v2.0.0 - MCP Integration (Major Feature Release)" -Body $releaseNotes_v2_0_0 -IsLatest $false
+Start-Sleep -Seconds 2
+
+# Create v3.0.0 (Latest)
+$release_v3_0_0 = Create-GitHubRelease -TagName "v3.0.0" -Name "v3.0.0 - Theme Toggle, Cross-Platform Support & Documentation Enhancement" -Body $releaseNotes_v3_0_0 -IsLatest $true
 
 # Summary
 Write-Host "`n=== Summary ===" -ForegroundColor Cyan
@@ -120,16 +125,24 @@ else {
 }
 
 if ($release_v2_0_0) { 
-    Write-Host "  ✓ v2.0.0 - MCP Integration (Major Feature Release) [LATEST]" -ForegroundColor Green
+    Write-Host "  ✓ v2.0.0 - MCP Integration (Major Feature Release)" -ForegroundColor Green
     $successCount++
 }
 else {
     Write-Host "  ✗ v2.0.0 - Failed" -ForegroundColor Red
 }
 
-Write-Host "`nTotal: $successCount/3 releases created successfully" -ForegroundColor Cyan
+if ($release_v3_0_0) { 
+    Write-Host "  ✓ v3.0.0 - Theme Toggle, Cross-Platform Support & Documentation Enhancement [LATEST]" -ForegroundColor Green
+    $successCount++
+}
+else {
+    Write-Host "  ✗ v3.0.0 - Failed" -ForegroundColor Red
+}
 
-if ($successCount -eq 3) {
+Write-Host "`nTotal: $successCount/4 releases created successfully" -ForegroundColor Cyan
+
+if ($successCount -eq 4) {
     Write-Host "`n✓ All releases created successfully!" -ForegroundColor Green
     Write-Host "View releases at: https://github.com/$owner/$repo/releases" -ForegroundColor Cyan
 }

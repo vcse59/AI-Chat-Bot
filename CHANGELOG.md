@@ -5,6 +5,70 @@ All notable changes to the ConvoAI project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2025-12-05
+
+### Added - Theme Toggle, Cross-Platform Support & Documentation Enhancement
+
+#### Theme Customization
+- **Dark/Light Mode Toggle**: All authenticated pages now support theme switching
+  - ChatPage, AnalyticsDashboard, UserManagement, WorkflowTemplates, RegisterAdmin
+  - Theme preference stored in user profile database
+  - Real-time theme switching with smooth transitions
+- **ThemeContext Provider**: React context for global theme state management
+- **CSS Variable System**: Centralized theme variables in `theme.css`
+  - Dynamic color switching for backgrounds, text, borders, shadows
+  - Component-level styling updates (MetricsCard, WorkflowTemplate)
+- **Theme-Agnostic Auth Pages**: Login and Register use standalone design with ConvoAI branding
+
+#### Standalone Service Deployment
+- **Per-Service .env.example Files**: Comprehensive configuration templates for all services
+  - auth-service, chat-service, analytics-service, langchain-service, timezone-mcp-server, chat-frontend
+- **Dockerfile-Based Deployment**: Each service can run independently with Docker
+- **Local Development Support**: Full instructions for running without Docker
+
+#### Cross-Platform Documentation
+- **Multi-Platform Instructions**: Windows (PowerShell/CMD), Linux, macOS support
+  - Docker volume mounting syntax for each platform
+  - Directory creation commands per platform
+  - File copying and environment activation commands
+- **README Updates**: All service READMEs enhanced with:
+  - Quick Start section with three deployment options
+  - Cross-platform command examples
+  - Environment configuration documentation
+
+### Changed
+
+#### Analytics Service
+- **Pydantic Model Fixes**: Added `protected_namespaces=()` to fix warnings
+  - MessageMetricsSchema, MessageDetailedMetrics, MessageTrackingRequest
+- **Import Cleanup**: Removed duplicate BaseModel import in analytics router
+- **Clean Startup Logs**: No more Pydantic warning messages
+
+#### Frontend
+- **Theme Toggle Button**: Added to all authenticated page headers
+- **CSS Variables**: Updated all page CSS files to use theme variables
+- **useTheme Hook**: New hook for easy access to theme state and toggle
+
+#### Database
+- **theme_preference Column**: Added to users table for theme persistence
+- **User Profile Sync**: Theme preference included in user operations
+
+### Fixed
+
+- **Pydantic Warnings**: Resolved `model_used` field conflicts with protected namespace
+- **Theme Persistence**: Fixed theme not persisting across page navigation
+- **CSS Variable Inheritance**: Fixed variable inheritance issues in nested components
+- **Documentation Inconsistencies**: Corrected cross-platform command syntax
+
+### Documentation
+
+- **Updated README Files**: auth-service, chat-service, analytics-service, langchain-service, timezone-mcp-server
+- **New .env.example Files**: Created/enhanced for all services
+- **Cross-Platform Instructions**: Added Windows CMD, PowerShell, Linux/Mac commands
+- **Version Update**: docs/VERSIONING.md updated for v3.0.0
+
+---
+
 ## [2.0.0] - 2025-11-18
 
 ### Added - MCP Integration (Major Feature Release)

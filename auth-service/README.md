@@ -98,36 +98,87 @@ User → Auth Server → JWT Token → ChatBot Service → Validates Token → A
 
 ## 🚀 Quick Start
 
-### Docker Deployment
+### Option 1: Docker Compose (Recommended for Full Platform)
 
-The service runs automatically with Docker Compose from the project root:
+Run with the full ConvoAI platform from project root:
 
 ```bash
-docker-compose up auth-service
+docker-compose up auth-server
 ```
 
-### Local Development
+### Option 2: Standalone Docker Container
+
+Build and run this service as a standalone container:
+
+```bash
+# Navigate to auth-service directory
+cd auth-service
+
+# Copy and configure environment
+cp .env.example .env
+# Edit .env with your settings
+
+# Build the Docker image
+docker build -t auth-service .
+
+# Run the container
+docker run -d \
+  --name auth-server \
+  -p 8001:8001 \
+  --env-file .env \
+  -v $(pwd)/data:/app/data \
+  auth-service
+
+# Check logs
+docker logs -f auth-server
+
+# Stop the container
+docker stop auth-server
+```
+
+**Windows (PowerShell):**
+```powershell
+# Run the container
+docker run -d `
+  --name auth-server `
+  -p 8001:8001 `
+  --env-file .env `
+  -v ${PWD}/data:/app/data `
+  auth-service
+
+# Check logs
+docker logs -f auth-server
+
+# Stop the container
+docker stop auth-server
+```
+
+**Windows (Command Prompt):**
+```cmd
+REM Run the container
+docker run -d --name auth-server -p 8001:8001 --env-file .env -v %cd%/data:/app/data auth-service
+
+REM Check logs
+docker logs -f auth-server
+
+REM Stop the container
+docker stop auth-server
+```
+
+### Option 3: Local Development (Without Docker)
 
 **Prerequisites:**
 - Python 3.12+
 - Poetry or pip
 
-**Option 1: Using Poetry (Recommended)**
+**Setup Steps:**
 
-1. Install dependencies:
+1. **Navigate to service directory:**
    ```bash
    cd auth-service
-   poetry install
    ```
 
-2. Run the server:
-   ```bash
-   poetry run start
-   ```
-
-**Option 2: Using Virtual Environment**
-
-1. Create and activate virtual environment:
+2. **Create and activate virtual environment:**
    
    **Windows:**
    ```cmd
@@ -141,68 +192,85 @@ docker-compose up auth-service
    source venv/bin/activate
    ```
 
-2. Install dependencies:
+3. **Install dependencies:**
    ```bash
-   pip install -r pyproject.toml  # or use poetry
+   # Using pip
+   pip install -r requirements.txt
+   
+   # Or using Poetry
+   poetry install
    ```
 
-3. Run the server:
+4. **Configure environment:**
    ```bash
-   uvicorn auth_server.main:app --reload --port 8001
+   cp .env.example .env
+   # Edit .env with your settings
    ```
 
-**Using Platform Scripts** (from project root):
+5. **Create data directory:**
+   
+   **Linux/Mac:**
+   ```bash
+   mkdir -p data
+   ```
+   
+   **Windows (PowerShell):**
+   ```powershell
+   New-Item -ItemType Directory -Force -Path data
+   ```
+   
+   **Windows (Command Prompt):**
+   ```cmd
+   mkdir data 2>nul
+   ```
 
-**Windows:**
-```cmd
-scripts\windows\start-auth-service.bat
-```
+6. **Run the server:**
+   ```bash
+   # Using uvicorn
+   uvicorn auth_server.main:app --host 0.0.0.0 --port 8001 --reload
+   
+   # Or using Poetry
+   poetry run start
+   ```
 
-**Linux/Mac:**
-```bash
-scripts/linux-mac/start-auth-service.sh
-```
-
-The server will be available at `http://localhost:8001`. Access interactive API documentation at `http://localhost:8001/docs`.
+**Access Points:**
+- API: http://localhost:8001
+- Swagger Docs: http://localhost:8001/docs
+- Health Check: http://localhost:8001/health
 
 ### Environment Configuration
 
-This service requires `AUTH_SECRET_KEY` from the root `.env` file:
+Copy `.env.example` to `.env` and configure:
 
 ```env
-# Root .env (AI-Chat-Bot/.env)
-AUTH_SECRET_KEY=your-secret-key-here
-OPENAI_API_KEY=your-openai-key-here
-```
-
-Service-specific configuration in `auth-service/.env`:
-
-```env
-PORT=8001
+# Server
 HOST=0.0.0.0
-CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+PORT=8001
+
+# Database
+DATABASE_URL=sqlite:///./data/auth.db
+
+# JWT (MUST change in production!)
+AUTH_SECRET_KEY=your-super-secret-key-at-least-32-characters
+
+# Admin user (created on first startup)
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+ADMIN_EMAIL=admin@example.com
 ```
 
-**Note:** Database path is automatically set to absolute path (`auth-service/auth.db`). No `DATABASE_URL` configuration needed.
+See `.env.example` for full configuration options.
 
 ### Create Admin User
 
-**Windows:**
-```cmd
-scripts\windows\setup-admin.bat
-```
-
-**Linux/Mac:**
-```bash
-scripts/linux-mac/setup-admin.sh
-```
+Admin user is created automatically on first startup using environment variables.
 
 Default credentials:
 - Username: `admin`
 - Password: `admin123`
 - Email: `admin@example.com`
 
-**Change the admin password immediately after first login!**
+**⚠️ Change the admin password immediately after first login!**
 
 ## 🧪 Testing
 

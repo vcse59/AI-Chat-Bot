@@ -77,6 +77,23 @@ class AuthService {
   }
 
   /**
+   * Register the first admin user (only works if no admin exists)
+   * @param {object} userData - Admin user registration data
+   * @returns {Promise} - Returns created admin user data
+   */
+  async registerFirstAdmin(userData) {
+    try {
+      const response = await axios.post(
+        `${AUTH_API_URL}/auth/register-first-admin`,
+        userData
+      );
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
    * Register a new admin user (admin-only endpoint)
    * @param {object} userData - Admin user registration data
    * @returns {Promise} - Returns created admin user data
@@ -86,6 +103,24 @@ class AuthService {
       const response = await axios.post(
         `${AUTH_API_URL}/auth/register-admin`,
         userData,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
+   * Get all users (admin-only)
+   * @returns {Promise} - Returns list of all users
+   */
+  async getAllUsers() {
+    try {
+      const response = await axios.get(
+        `${AUTH_API_URL}/users/`,
         {
           headers: this.getAuthHeader(),
         }
@@ -168,6 +203,44 @@ class AuthService {
   hasRole(role) {
     const user = this.getCurrentUser();
     return user && user.roles && user.roles.includes(role);
+  }
+
+  /**
+   * Get current user's theme preference from the server
+   * @returns {Promise} - Returns theme preference object
+   */
+  async getThemePreference() {
+    try {
+      const response = await axios.get(
+        `${AUTH_API_URL}/users/me/theme`,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
+  }
+
+  /**
+   * Update current user's theme preference
+   * @param {string} theme - Theme preference ('dark' or 'light')
+   * @returns {Promise} - Returns update confirmation
+   */
+  async updateThemePreference(theme) {
+    try {
+      const response = await axios.put(
+        `${AUTH_API_URL}/users/me/theme`,
+        { theme_preference: theme },
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw this._handleError(error);
+    }
   }
 
   /**

@@ -23,7 +23,23 @@ export const useConversations = () => {
   useEffect(() => {
     loadConversations();
 
-    // Listen for external conversation changes (e.g., admin deletions)
+    // Check if there was a recent workflow creation (for same-tab navigation)
+    const lastChange = localStorage.getItem('conversationChanged');
+    if (lastChange) {
+      try {
+        const parsed = JSON.parse(lastChange);
+        // If the change was within the last 5 seconds, refresh
+        if (parsed.timestamp && Date.now() - parsed.timestamp < 5000) {
+          loadConversations(true);
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+      // Clear the flag after processing
+      localStorage.removeItem('conversationChanged');
+    }
+
+    // Listen for external conversation changes (e.g., admin deletions, workflow creations)
     const handleExternalConversationChange = (event) => {
       const { action, conversationId } = event.detail;
       
@@ -31,15 +47,26 @@ export const useConversations = () => {
         // Remove conversation from list without API call
         setConversations(prev => prev.filter(c => c.id !== conversationId));
       } else {
-        // For other actions, silently refresh the list
+        // For other actions (created, updated), silently refresh the list
         loadConversations(true);
       }
     };
 
     window.addEventListener('conversationDeleted', handleExternalConversationChange);
+    window.addEventListener('conversationChanged', handleExternalConversationChange);
+
+    // Listen for cross-tab conversation changes via localStorage
+    const handleStorageChange = (event) => {
+      if (event.key === 'conversationChanged') {
+        loadConversations(true);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
       window.removeEventListener('conversationDeleted', handleExternalConversationChange);
+      window.removeEventListener('conversationChanged', handleExternalConversationChange);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 

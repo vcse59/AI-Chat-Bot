@@ -1,24 +1,30 @@
 # ConvoAI - Intelligent Conversation Platform with MCP Integration
 
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](VERSION)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 A production-ready, full-stack AI conversation platform featuring Model Context Protocol (MCP) integration, React frontend, OAuth 2.0 authentication, real-time WebSocket communication, and OpenAI function calling. Built with React and FastAPI for a complete microservices solution.
 
 ## 🌟 Overview
 
-This platform consists of five main components working together to provide a secure, intelligent chatbot experience with comprehensive analytics and extensible tool support:
+This platform consists of six main components working together to provide a secure, intelligent chatbot experience with comprehensive analytics and extensible tool support:
 
-1. **React Chat Frontend** (Port 3000) - Modern, responsive web UI with real-time messaging, integrated analytics, and MCP server management
-2. **Authorization Server** (Port 8001) - OAuth 2.0 authentication and role-based access control
+1. **React Chat Frontend** (Port 3000) - Modern, responsive web UI with real-time messaging, integrated analytics, MCP server management, and dark/light theme toggle
+2. **Authorization Server** (Port 8001) - OAuth 2.0 authentication and role-based access control with theme preference storage
 3. **ChatBot Service** (Port 8000) - AI-powered conversations with OpenAI function calling, WebSocket support, and MCP integration
 4. **Analytics Service** (Port 8002) - Admin-only analytics and metrics tracking with real-time updates
-5. **MCP Servers** (Port 8003+) - Extensible tool servers following Model Context Protocol standard
+5. **LangChain Service** (Port 8004) - Advanced AI workflows using LangChain with multiple chain types
+6. **MCP Servers** (Port 8003+) - Extensible tool servers following Model Context Protocol standard
 
 ### 🚀 Deployment Options
 
-- **Docker**: Containerized deployment with Docker Compose (recommended for production)
-- **Local Development**: Run services directly on Windows, macOS, or Linux using platform-specific scripts
+- **Docker Compose**: Full platform deployment (recommended for production)
+- **Standalone Docker**: Individual service containers with their own configuration
+- **Local Development**: Run services directly on Windows, macOS, or Linux
 
 ### 🎯 Key Highlights
 
+- 🎨 **Theme Toggle**: Dark/light mode support with user preference persistence
 - 🔌 **MCP Integration**: Model Context Protocol support for extensible AI tools
 - 🛠️ **Tool Management**: User-friendly interface to register and manage MCP servers
 - 🔐 **Auto Authentication**: User tokens automatically passed to MCP servers
@@ -27,6 +33,7 @@ This platform consists of five main components working together to provide a sec
 - 🎫 **Token Tracking**: Monitor OpenAI API token usage across all conversations
 - 👥 **User Activity**: Track active users, conversations, and message counts
 - 🚀 **Production Ready**: Comprehensive tracking middleware and public API endpoints
+- 📦 **Standalone Services**: Each service can run independently with its own configuration
 
 ## 🏗️ System Architecture
 
