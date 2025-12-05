@@ -88,7 +88,6 @@ def init_admin_user():
         db.commit()
         print(f"✅ Admin user '{admin_username}' created successfully!")
         print(f"   Username: {admin_username}")
-        print(f"   Password: {admin_password}")
         print(f"   Email: {admin_email}")
         
     except Exception as e:
