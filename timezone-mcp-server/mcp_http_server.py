@@ -498,10 +498,11 @@ async def handle_messages(request: Request):
         message = await request.json()
         msg_id = message.get("id")
     except Exception as e:
+        logger.error(f"JSON parse error: {e}", exc_info=True)
         return {
             "jsonrpc": "2.0",
             "id": None,
-            "error": {"code": -32700, "message": f"Parse error: {str(e)}"}
+            "error": {"code": -32700, "message": "Parse error"}
         }
     
     # Verify authentication
